@@ -60,9 +60,9 @@ public class ExratesPublicApi {
 
     public List<QuotesDto> getTickerInfoCached(@NotNull List<String> pairs) {
         return pairs.stream()
-                .map(pair -> tickerInfoCache.get(pair, () -> getTickerInfo(pair)))
-                .filter(Objects::nonNull)
-                .map(QuotesDto::of)
+                .map(pair -> Pair.of(pair, tickerInfoCache.get(pair, () -> getTickerInfo(pair))))
+                .filter(pair -> Objects.nonNull(pair.getValue()))
+                .map(pair -> QuotesDto.of(pair.getKey(), pair.getValue()))
                 .collect(Collectors.toList());
     }
 
