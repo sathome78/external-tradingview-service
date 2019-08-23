@@ -70,3 +70,7 @@ application:
 
 authorize:
   2fa-required: true
+
+api:
+  exrates:
+    url: http://172.31.14.167:8080/openapi/v1
