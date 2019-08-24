@@ -49,15 +49,13 @@ spring:
       default_view_inclusion: true
     default-property-inclusion: 'non_null'
   mail:
-    host: email-smtp.us-east-1.amazonaws.com
-    username: AKIA6M5IMESXGM7DI2XJ
-    password: BPg7g+834jBANU1aT57lZI3oowDQ8J5J4VWOOe6sxSq/
+    host: smtp.gmail.com
+    port: 587
+    username: exrates.2019@gmail.com
+    password: 123qwe123QWE
     properties:
-      mail.transport.protocol: smtp
-      mail.smtp.port: 587
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
-      mail.smtp.starttls.required: true
 
 application:
   security:
@@ -67,9 +65,15 @@ application:
     address: oleg.kostiukevych@upholding.biz
     name: Exrates
     title-prefix:
-
-authorize:
-  2fa-required: true
+  authorize:
+    2fa-required: true
+  allowed-resolutions: >
+    5 MINUTE;
+    15 MINUTE;
+    30 MINUTE;
+    1 HOUR;
+    6 HOUR;
+    1 DAY;
 
 api:
   exrates:

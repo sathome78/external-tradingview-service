@@ -6,14 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.exrates.externalservice.api.ExratesPublicApi;
+import me.exrates.externalservice.entities.enums.ResStatus;
 
 @Data
 @Builder(builderClassName = "Builder", toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuotesDto {
-
-    private static final String OK = "ok";
 
     @JsonProperty("s")
     private String status;
@@ -24,7 +23,7 @@ public class QuotesDto {
 
     public static QuotesDto of(String pair, ExratesPublicApi.TickerResponse response) {
         return QuotesDto.builder()
-                .status(OK)
+                .status(ResStatus.OK.getStatus())
                 .pair(pair)
                 .price(PriceDto.of(response))
                 .build();

@@ -13,6 +13,7 @@ public class CacheConfiguration {
 
     public final static String CACHE_CURRENCY_PAIRS = "cache.currency-pairs";
     public final static String CACHE_TICKER_INFO = "cache.ticker-info";
+    public final static String CACHE_CANDLE_CHART_DATA = "cache.candle-chart-data";
 
     @Bean(CACHE_CURRENCY_PAIRS)
     public Cache cacheCurrencyPairs() {
@@ -24,7 +25,14 @@ public class CacheConfiguration {
     @Bean(CACHE_TICKER_INFO)
     public Cache cacheTickerInfo() {
         return new CaffeineCache(CACHE_TICKER_INFO, Caffeine.newBuilder()
-                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build());
+    }
+
+    @Bean(CACHE_CANDLE_CHART_DATA)
+    public Cache cacheCandleChartData() {
+        return new CaffeineCache(CACHE_CANDLE_CHART_DATA, Caffeine.newBuilder()
+                .expireAfterWrite(1, TimeUnit.MINUTES)
                 .build());
     }
 }
