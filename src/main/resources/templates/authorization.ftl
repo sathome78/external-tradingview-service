@@ -57,9 +57,9 @@
                             &#13;
                             <td style="font-family: 'Open Sans', sans-serif; font-size: 12px; line-height: 16px; box-sizing: border-box; font-weight: 400; vertical-align: top; text-align: center; padding: 0 0 20px;"
                                 align="center" valign="top">&#13;
-                                Тел.: +0 000 000 0000 <br
+                                Тел.: +0 123 456 7890 <br
                                         style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400;"/>&#13;
-                                Email: oleg.kostiukevych@upholding.biz <br
+                                Email: exrates.2019@gmail.com <br
                                         style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400;"/>&#13;
                                 Telegram: &#13;
                             </td>&#13;

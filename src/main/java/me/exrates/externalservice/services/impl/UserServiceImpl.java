@@ -75,6 +75,7 @@ public class UserServiceImpl implements UserService {
                 .login(login)
                 .password(passwordEncoder.encode(password))
                 .phone(phone)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         userRepository.save(user);
@@ -83,7 +84,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void authorize(String login) throws UserNotFoundException {
         User user = findOne(login);
-        user.setCode(Integer.valueOf(RandomStringUtils.randomNumeric(7)));
+        user.setCode(Integer.valueOf(RandomStringUtils.randomNumeric(6)));
         userRepository.save(user);
 
         afterCommitExecutor.execute(() -> {
@@ -114,6 +115,7 @@ public class UserServiceImpl implements UserService {
                 .withSubject(user.getLogin())
                 .withExpiresAt(Date.from(expireTime.atZone(ZoneOffset.systemDefault()).toInstant()))
                 .sign(Algorithm.HMAC256(securityProperties.getAuthorizationSecret()));
+
         return new JwtTokenDto(accessToken, Timestamp.valueOf(expireTime).getTime(), true);
     }
 }

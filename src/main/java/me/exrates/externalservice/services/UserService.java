@@ -6,7 +6,6 @@ import me.exrates.externalservice.exceptions.AuthorizationException;
 import me.exrates.externalservice.exceptions.InvalidCodeException;
 import me.exrates.externalservice.exceptions.conflict.EmailExistException;
 import me.exrates.externalservice.exceptions.notfound.UserNotFoundException;
-import me.exrates.externalservice.form.RegisterForm;
 
 public interface UserService {
 

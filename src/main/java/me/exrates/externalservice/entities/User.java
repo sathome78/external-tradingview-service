@@ -2,7 +2,6 @@ package me.exrates.externalservice.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -51,11 +49,6 @@ public class User implements UserDetails, Serializable {
     private LocalDateTime createdAt;
     @Column(name = "2fa_code", length = 7)
     private Integer code;
-
-    @PrePersist
-    private void init() {
-        createdAt = LocalDateTime.now();
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,6 +1,7 @@
 package me.exrates.externalservice.controllers;
 
 import me.exrates.externalservice.dto.JwtTokenDto;
+import me.exrates.externalservice.entities.enums.ResStatus;
 import me.exrates.externalservice.exceptions.ServiceException;
 import me.exrates.externalservice.exceptions.ValidationException;
 import me.exrates.externalservice.exceptions.conflict.EmailExistException;
@@ -35,7 +36,7 @@ public class UserController {
 
     @Autowired
     public UserController(UserService userService,
-                          @Value("${authorize.2fa-required}") boolean required2FA) {
+                          @Value("${application.authorize.2fa-required}") boolean required2FA) {
         this.userService = userService;
         this.required2FA = required2FA;
     }
@@ -51,11 +52,11 @@ public class UserController {
             }
             userService.register(form.getLogin(), form.getPassword(), form.getPhone());
 
-            response.put("s", "ok");
+            response.put("s", ResStatus.OK.getStatus());
 
             return ResponseEntity.ok(response);
         } catch (ValidationException | EmailExistException ex) {
-            response.put("s", "error");
+            response.put("s", ResStatus.ERROR.getStatus());
             response.put("errmsg", ex.getMessage());
 
             return ResponseEntity.badRequest().body(response);
@@ -78,10 +79,10 @@ public class UserController {
             } else {
                 tokenDto = userService.authorize(form.getLogin(), form.getPassword(), form.getCode());
             }
-            response.put("s", "ok");
+            response.put("s", ResStatus.OK.getStatus());
             response.put("d", tokenDto);
         } catch (ValidationException | ServiceException ex) {
-            response.put("s", "error");
+            response.put("s", ResStatus.ERROR.getStatus());
             response.put("errmsg", ex.getMessage());
         }
         return ResponseEntity.ok(response);
