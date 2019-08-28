@@ -1,5 +1,6 @@
 package me.exrates.externalservice.controllers;
 
+import me.exrates.externalservice.api.models.CandleChartResponse;
 import me.exrates.externalservice.converters.BarDataConverter;
 import me.exrates.externalservice.dto.CandleDto;
 import me.exrates.externalservice.dto.QuotesDto;
@@ -14,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import static java.util.Objects.nonNull;
+import static me.exrates.externalservice.api.ExratesPublicApi.FORMATTER;
 
 @RestController
 @RequestMapping("/api")
@@ -37,10 +38,10 @@ public class DataIntegrationController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            List<QuotesDto> quotes = integrationService.getQuotes(symbols);
+            List<QuotesDto> data = integrationService.getQuotes(symbols);
 
             response.put("s", ResStatus.OK.getStatus());
-            response.put("d", quotes);
+            response.put("d", data);
         } catch (Exception ex) {
             response.put("s", ResStatus.ERROR.getStatus());
             response.put("errmsg", ex.getMessage());
@@ -57,19 +58,18 @@ public class DataIntegrationController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            List<CandleDto> history = integrationService.getHistory(symbol, resolution, from, to, countback);
+            CandleChartResponse data = integrationService.getHistory(symbol, resolution, from, to, countback);
 
-            if (CollectionUtils.isEmpty(history)) {
-                // todo: get previous candle time
-                LocalDateTime nextTime = null;
-
+            List<CandleDto> candlesList = data.getBody();
+            if (CollectionUtils.isEmpty(candlesList)) {
                 response.put("s", ResStatus.NO_DATA.getStatus());
 
-                if (nonNull(nextTime)) {
-                    response.put("nb", nextTime);
+                List<String> errors = data.getErrors();
+                if (Objects.nonNull(errors.get(0))) {
+                    response.put("nb", FORMATTER.parse(errors.get(0)));
                 }
             } else {
-                response.putAll(BarDataConverter.convert(history));
+                response.putAll(BarDataConverter.convert(candlesList));
             }
             return ResponseEntity.ok(response);
         } catch (Exception ex) {

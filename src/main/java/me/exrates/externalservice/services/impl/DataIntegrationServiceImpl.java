@@ -2,7 +2,7 @@ package me.exrates.externalservice.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.api.ExratesPublicApi;
-import me.exrates.externalservice.dto.CandleDto;
+import me.exrates.externalservice.api.models.CandleChartResponse;
 import me.exrates.externalservice.dto.QuotesDto;
 import me.exrates.externalservice.dto.ResolutionDto;
 import me.exrates.externalservice.exceptions.UnsupportedResolutionException;
@@ -39,7 +39,7 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
     }
 
     @Override
-    public List<CandleDto> getHistory(String symbol, String resolution, long from, long to, int countback) {
+    public CandleChartResponse getHistory(String symbol, String resolution, long from, long to, int countback) {
         ResolutionDto resolutionDto = TimeUtil.getResolution(resolution);
 
         checkResolution(resolutionDto);

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.api.ExratesPublicApi;
+import me.exrates.externalservice.api.models.TickerResponse;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -38,7 +38,7 @@ public class PriceDto {
     private int buyPipValue;
     private int sellPipValue;
 
-    public static PriceDto of(ExratesPublicApi.TickerResponse response) {
+    public static PriceDto of(TickerResponse response) {
         final double last = response.getLast().doubleValue();
         final double percentChange = response.getPercentChange().doubleValue();
         final double changeDouble = last * percentChange / 100;

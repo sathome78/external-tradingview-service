@@ -1,19 +1,13 @@
 package me.exrates.externalservice.api;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import me.exrates.externalservice.dto.CandleDto;
+import me.exrates.externalservice.api.models.CandleChartResponse;
+import me.exrates.externalservice.api.models.CurrencyPairResponse;
+import me.exrates.externalservice.api.models.TickerResponse;
 import me.exrates.externalservice.dto.QuotesDto;
 import me.exrates.externalservice.dto.ResolutionDto;
+import me.exrates.externalservice.entities.enums.ResolutionType;
 import me.exrates.externalservice.exceptions.api.ExratesApiException;
 import me.exrates.externalservice.utils.KeyGeneratorUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -28,10 +22,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +45,7 @@ public class ExratesPublicApi {
     private static final String ALL = "All";
     private static final String DELIMITER = "/";
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd_MM_yyyy_HH_mm_ss");
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd_MM_yyyy_HH_mm_ss");
 
     private final String url;
 
@@ -81,26 +74,20 @@ public class ExratesPublicApi {
     }
 
     private QuotesDto getTickerInfo(@NotNull String symbol) {
-        ResponseEntity<TickerResponse[]> responseEntity;
-        try {
-            responseEntity = restTemplate.getForEntity(String.format("%s/public/ticker?currency_pair=%s", url, convert(symbol)), TickerResponse[].class);
-            if (responseEntity.getStatusCodeValue() != 200) {
-                throw new ExratesApiException("Exrates server is not available");
-            }
-        } catch (Exception ex) {
-            log.warn("Exrates service did not return valid data: server not available", ex);
-            return null;
+        ResponseEntity<TickerResponse[]> responseEntity = restTemplate.getForEntity(String.format("%s/public/ticker?currency_pair=%s", url, convert(symbol)), TickerResponse[].class);
+        if (responseEntity.getStatusCodeValue() != 200) {
+            throw new ExratesApiException("Exrates server is not available");
         }
-        TickerResponse[] body = responseEntity.getBody();
 
+        TickerResponse[] body = responseEntity.getBody();
         if (Objects.isNull(body)) {
             return null;
         }
         return QuotesDto.of(symbol, Arrays.asList(body).get(0));
     }
 
-    public List<CandleDto> getCandleChartDataCached(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
-                                                    @NotNull LocalDateTime fromDate, @NotNull LocalDateTime toDate) {
+    public CandleChartResponse getCandleChartDataCached(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
+                                                        @NotNull LocalDateTime fromDate, @NotNull LocalDateTime toDate) {
         final String cacheKey = KeyGeneratorUtil.generate(DELIMITER,
                 symbol,
                 resolutionDto.toString(),
@@ -110,35 +97,27 @@ public class ExratesPublicApi {
         return candleChartDataCache.get(cacheKey, () -> getCandleChartData(symbol, resolutionDto, fromDate, toDate));
     }
 
-    private List<CandleDto> getCandleChartData(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
-                                               @NotNull LocalDateTime fromDate, @NotNull LocalDateTime toDate) {
+    private CandleChartResponse getCandleChartData(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
+                                                   @NotNull LocalDateTime fromDate, @NotNull LocalDateTime toDate) {
         final String queryParams = buildQueryParams(fromDate, toDate, resolutionDto);
 
-        ResponseEntity<CandleChartResponse[]> responseEntity;
-        try {
-            responseEntity = restTemplate.getForEntity(String.format("%s/public/%s/candle_chart?%s", url, convert(symbol), queryParams), CandleChartResponse[].class);
-            if (responseEntity.getStatusCodeValue() != 200) {
-                throw new ExratesApiException("Exrates server is not available");
-            }
-        } catch (Exception ex) {
-            log.warn("Exrates service did not return valid data: server not available", ex);
-            return null;
+        ResponseEntity<CandleChartResponse> responseEntity = restTemplate.getForEntity(String.format("%s/public/%s/candle_chart?%s", url, convert(symbol), queryParams), CandleChartResponse.class);
+        if (responseEntity.getStatusCodeValue() != 200) {
+            throw new ExratesApiException("Exrates server is not available");
         }
-        CandleChartResponse[] body = responseEntity.getBody();
 
+        CandleChartResponse body = responseEntity.getBody();
         if (Objects.isNull(body)) {
             return null;
         }
-        return Arrays.stream(body)
-                .map(CandleDto::of)
-                .collect(Collectors.toList());
+        return body;
     }
 
     private String buildQueryParams(LocalDateTime fromDate, LocalDateTime toDate, ResolutionDto resolutionDto) {
         String fromParam = String.format("from_date=%s", fromDate.format(DateTimeFormatter.ISO_DATE_TIME));
         String toParam = String.format("to_date=%s", toDate.format(DateTimeFormatter.ISO_DATE_TIME));
-        String intervalValueParam = String.format("intervalValue=%s", String.valueOf(resolutionDto.getValue()));
-        String intervalTypeParam = String.format("intervalType=%s", resolutionDto.getType().name());
+        String intervalValueParam = String.format("interval_value=%s", String.valueOf(resolutionDto.getValue()));
+        String intervalTypeParam = String.format("interval_type=%s", resolutionDto.getType().name());
 
         return String.join("&", fromParam, toParam, intervalValueParam, intervalTypeParam);
     }
@@ -148,74 +127,25 @@ public class ExratesPublicApi {
     }
 
     private Map<String, String> getCurrencyPairs() {
-        ResponseEntity<CurrencyPairResponse[]> responseEntity;
-        try {
-            responseEntity = restTemplate.getForEntity(String.format("%s/public/currency_pairs", url), CurrencyPairResponse[].class);
-            if (responseEntity.getStatusCodeValue() != 200) {
-                throw new ExratesApiException("Exrates server is not available");
-            }
-        } catch (Exception ex) {
-            log.warn("Exrates service did not return valid data: server not available", ex);
-            return Collections.emptyMap();
+        ResponseEntity<CurrencyPairResponse[]> responseEntity = restTemplate.getForEntity(String.format("%s/public/currency_pairs", url), CurrencyPairResponse[].class);
+        if (responseEntity.getStatusCodeValue() != 200) {
+            throw new ExratesApiException("Exrates server is not available");
         }
-        CurrencyPairResponse[] body = responseEntity.getBody();
 
+        CurrencyPairResponse[] body = responseEntity.getBody();
         if (Objects.isNull(body)) {
             return Collections.emptyMap();
         }
         return Stream.of(body)
-                .map(currencyPairDto -> Pair.of(currencyPairDto.name.replace(DELIMITER, StringUtils.EMPTY), currencyPairDto.urlSymbol))
+                .map(currencyPairDto -> Pair.of(currencyPairDto.getName().replace(DELIMITER, StringUtils.EMPTY), currencyPairDto.getUrlSymbol()))
                 .collect(Collectors.toMap(
                         Pair::getKey,
-                        Pair::getValue));
+                        Pair::getValue,
+                        (v1, v2) -> v1));
     }
 
     private String convert(String pair) {
         return getCurrencyPairsCached().get(pair);
-    }
-
-    @Getter
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public static class TickerResponse {
-
-        Integer id;
-        String name;
-        BigDecimal last;
-        BigDecimal lowestAsk;
-        BigDecimal highestBid;
-        BigDecimal percentChange;
-        BigDecimal baseVolume;
-        BigDecimal quoteVolume;
-        BigDecimal high;
-        BigDecimal low;
-    }
-
-    @Getter
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public static class CandleChartResponse {
-
-        @JsonSerialize(using = LocalDateTimeSerializer.class)
-        @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-        LocalDateTime time;
-        BigDecimal close;
-        BigDecimal open;
-        BigDecimal high;
-        BigDecimal low;
-        BigDecimal volume;
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    private static class CurrencyPairResponse {
-
-        String name;
-        @JsonProperty("url_symbol")
-        String urlSymbol;
     }
 
     public static void main(String[] args) {
@@ -228,10 +158,15 @@ public class ExratesPublicApi {
         CaffeineCache candleChartDataCache = new CaffeineCache(CACHE_CANDLE_CHART_DATA, Caffeine.newBuilder()
                 .expireAfterWrite(1, TimeUnit.MINUTES)
                 .build());
-        ExratesPublicApi exratesPublicApi = new ExratesPublicApi("https://api.exrates.me/openapi/v1", currencyPairCache, tickerInfoCache, candleChartDataCache);
-        List<String> list = new ArrayList<>();
-        list.add("BTCUSD");
-        list.add("ETHUSD");
-        List<QuotesDto> btcusd = exratesPublicApi.getTickerInfoCached(list);
+        ExratesPublicApi exratesPublicApi = new ExratesPublicApi("http://localhost:8080/openapi/v1", currencyPairCache, tickerInfoCache, candleChartDataCache);
+//        List<String> list = new ArrayList<>();
+//        list.add("BTCUSD");
+//        list.add("ETHUSD");
+//        List<QuotesDto> btcusd = exratesPublicApi.getTickerInfoCached(list);
+
+        ResolutionDto resolutionDto = new ResolutionDto(ResolutionType.HOUR, 1);
+        LocalDateTime to = LocalDateTime.now();
+        LocalDateTime from = to.minus(2, ChronoUnit.YEARS);
+        CandleChartResponse chartDataCached = exratesPublicApi.getCandleChartDataCached("BTCUSD", resolutionDto, from, to);
     }
 }

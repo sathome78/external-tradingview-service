@@ -7,6 +7,7 @@ import me.exrates.externalservice.dto.CandleDto;
 import me.exrates.externalservice.entities.enums.ResStatus;
 
 import java.math.BigDecimal;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public final class BarDataConverter {
         List<BigDecimal> v = new ArrayList<>();
 
         data.forEach(candle -> {
-            t.add(candle.getTime());
+            t.add(candle.getTime().toEpochSecond(ZoneOffset.UTC));
             o.add(candle.getOpen());
             h.add(candle.getHigh());
             l.add(candle.getLow());
