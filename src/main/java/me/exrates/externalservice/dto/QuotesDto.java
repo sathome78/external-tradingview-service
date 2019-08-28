@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.api.ExratesPublicApi;
+import me.exrates.externalservice.api.models.TickerResponse;
 import me.exrates.externalservice.entities.enums.ResStatus;
 
 @Data
@@ -21,7 +21,7 @@ public class QuotesDto {
     @JsonProperty("v")
     private PriceDto price;
 
-    public static QuotesDto of(String pair, ExratesPublicApi.TickerResponse response) {
+    public static QuotesDto of(String pair, TickerResponse response) {
         return QuotesDto.builder()
                 .status(ResStatus.OK.getStatus())
                 .pair(pair)

@@ -1,36 +1,35 @@
 package me.exrates.externalservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.api.ExratesPublicApi;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.ZoneOffset;
+import java.time.LocalDateTime;
 
-@Data
+@Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Builder(builderClassName = "Builder", toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class CandleDto {
 
-    private Long time;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime time;
     private BigDecimal close;
     private BigDecimal open;
     private BigDecimal high;
     private BigDecimal low;
     private BigDecimal volume;
-
-    public static CandleDto of(ExratesPublicApi.CandleChartResponse response) {
-        return CandleDto.builder()
-                .time(response.getTime().toEpochSecond(ZoneOffset.UTC))
-                .close(response.getClose())
-                .open(response.getOpen())
-                .high(response.getHigh())
-                .low(response.getLow())
-                .volume(response.getVolume())
-                .build();
-    }
 }
