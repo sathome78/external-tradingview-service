@@ -4,12 +4,14 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.api.models.CandleChartResponse;
 import me.exrates.externalservice.api.models.CurrencyPairResponse;
+import me.exrates.externalservice.api.models.OrderBookResponse;
 import me.exrates.externalservice.api.models.TickerResponse;
+import me.exrates.externalservice.api.models.TradeHistoryResponse;
 import me.exrates.externalservice.dto.QuotesDto;
 import me.exrates.externalservice.dto.ResolutionDto;
-import me.exrates.externalservice.entities.enums.ResolutionType;
 import me.exrates.externalservice.exceptions.api.ExratesApiException;
 import me.exrates.externalservice.utils.KeyGeneratorUtil;
+import me.exrates.externalservice.utils.QueryBuilderUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -99,7 +102,7 @@ public class ExratesPublicApi {
 
     private CandleChartResponse getCandleChartData(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
                                                    @NotNull LocalDateTime fromDate, @NotNull LocalDateTime toDate) {
-        final String queryParams = buildQueryParams(fromDate, toDate, resolutionDto);
+        final String queryParams = QueryBuilderUtil.build(fromDate, toDate, resolutionDto);
 
         ResponseEntity<CandleChartResponse> responseEntity = restTemplate.getForEntity(String.format("%s/public/%s/candle_chart?%s", url, convert(symbol), queryParams), CandleChartResponse.class);
         if (responseEntity.getStatusCodeValue() != 200) {
@@ -113,13 +116,32 @@ public class ExratesPublicApi {
         return body;
     }
 
-    private String buildQueryParams(LocalDateTime fromDate, LocalDateTime toDate, ResolutionDto resolutionDto) {
-        String fromParam = String.format("from_date=%s", fromDate.format(DateTimeFormatter.ISO_DATE_TIME));
-        String toParam = String.format("to_date=%s", toDate.format(DateTimeFormatter.ISO_DATE_TIME));
-        String intervalValueParam = String.format("interval_value=%s", String.valueOf(resolutionDto.getValue()));
-        String intervalTypeParam = String.format("interval_type=%s", resolutionDto.getType().name());
+    public OrderBookResponse getOrderBook(@NotNull String symbol) {
+        ResponseEntity<OrderBookResponse> responseEntity = restTemplate.getForEntity(String.format("%s/public/orderbook/%s", url, convert(symbol)), OrderBookResponse.class);
+        if (responseEntity.getStatusCodeValue() != 200) {
+            throw new ExratesApiException("Exrates server is not available");
+        }
 
-        return String.join("&", fromParam, toParam, intervalValueParam, intervalTypeParam);
+        OrderBookResponse body = responseEntity.getBody();
+        if (Objects.isNull(body)) {
+            return null;
+        }
+        return body;
+    }
+
+    public TradeHistoryResponse getTradeHistory(@NotNull String symbol, @NotNull LocalDate fromDate, @NotNull LocalDate toDate) {
+        final String queryParams = QueryBuilderUtil.build(fromDate, toDate);
+
+        ResponseEntity<TradeHistoryResponse> responseEntity = restTemplate.getForEntity(String.format("%s/public/history/%s?%s", url, convert(symbol), queryParams), TradeHistoryResponse.class);
+        if (responseEntity.getStatusCodeValue() != 200) {
+            throw new ExratesApiException("Exrates server is not available");
+        }
+
+        TradeHistoryResponse body = responseEntity.getBody();
+        if (Objects.isNull(body)) {
+            return null;
+        }
+        return body;
     }
 
     public Map<String, String> getCurrencyPairsCached() {
@@ -158,15 +180,21 @@ public class ExratesPublicApi {
         CaffeineCache candleChartDataCache = new CaffeineCache(CACHE_CANDLE_CHART_DATA, Caffeine.newBuilder()
                 .expireAfterWrite(1, TimeUnit.MINUTES)
                 .build());
-        ExratesPublicApi exratesPublicApi = new ExratesPublicApi("http://localhost:8080/openapi/v1", currencyPairCache, tickerInfoCache, candleChartDataCache);
+        ExratesPublicApi exratesPublicApi = new ExratesPublicApi("http://172.31.14.167:8080/openapi/v1", currencyPairCache, tickerInfoCache, candleChartDataCache);
 //        List<String> list = new ArrayList<>();
 //        list.add("BTCUSD");
 //        list.add("ETHUSD");
 //        List<QuotesDto> btcusd = exratesPublicApi.getTickerInfoCached(list);
 
-        ResolutionDto resolutionDto = new ResolutionDto(ResolutionType.HOUR, 1);
-        LocalDateTime to = LocalDateTime.now();
-        LocalDateTime from = to.minus(2, ChronoUnit.YEARS);
-        CandleChartResponse chartDataCached = exratesPublicApi.getCandleChartDataCached("BTCUSD", resolutionDto, from, to);
+//        ResolutionDto resolutionDto = new ResolutionDto(ResolutionType.HOUR, 1);
+//        LocalDateTime to = LocalDateTime.now();
+//        LocalDateTime from = to.minus(2, ChronoUnit.YEARS);
+//        CandleChartResponse chartDataCached = exratesPublicApi.getCandleChartDataCached("BTCUSD", resolutionDto, from, to);
+
+//        OrderBookResponse btcusd = exratesPublicApi.getOrderBook("BTCUSD");
+
+        LocalDate to = LocalDate.now();
+        LocalDate from = to.minus(30, ChronoUnit.DAYS);
+        TradeHistoryResponse btcusd = exratesPublicApi.getTradeHistory("BTCUSD", from, to);
     }
 }

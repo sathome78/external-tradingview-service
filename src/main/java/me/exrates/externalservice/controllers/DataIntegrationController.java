@@ -78,4 +78,32 @@ public class DataIntegrationController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/streaming")
+    public ResponseEntity getStreamOfPrices() {
+        Map<String, Object> response = new HashMap<>();
+//
+//        try {
+//            CandleChartResponse data = integrationService.getHistory(symbol, resolution, from, to, countback);
+//
+//            List<CandleDto> candlesList = data.getBody();
+//            if (CollectionUtils.isEmpty(candlesList)) {
+//                response.put("s", ResStatus.NO_DATA.getStatus());
+//
+//                List<String> errors = data.getErrors();
+//                if (Objects.nonNull(errors.get(0))) {
+//                    response.put("nb", FORMATTER.parse(errors.get(0)));
+//                }
+//            } else {
+//                response.putAll(BarDataConverter.convert(candlesList));
+//            }
+//            return ResponseEntity.ok(response);
+//        } catch (Exception ex) {
+//            response.put("s", ResStatus.ERROR.getStatus());
+//            response.put("errmsg", ex.getMessage());
+//        }
+//        return ResponseEntity.ok(response);
+
+        return ResponseEntity.ok().build();
+    }
 }
