@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "application.security")
-public class SecurityProperties {
+@ConfigurationProperties(prefix = "application.email")
+public class EmailProperty {
 
-    private String authorizationSecret;
+    private String address;
+    private String name;
+    private String titlePrefix;
 }

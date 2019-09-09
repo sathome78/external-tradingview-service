@@ -6,7 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
-import me.exrates.externalservice.properties.SecurityProperties;
+import me.exrates.externalservice.properties.SecurityProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,10 +26,10 @@ public abstract class AbstractJwtAuthenticationProcessFilter extends GenericFilt
 
     private static final String AUTH_PREFIX = "Bearer";
 
-    private final SecurityProperties securityProperties;
+    private final SecurityProperty securityProperty;
 
-    protected AbstractJwtAuthenticationProcessFilter(SecurityProperties securityProperties) {
-        this.securityProperties = securityProperties;
+    protected AbstractJwtAuthenticationProcessFilter(SecurityProperty securityProperty) {
+        this.securityProperty = securityProperty;
     }
 
     @Override
@@ -51,7 +51,7 @@ public abstract class AbstractJwtAuthenticationProcessFilter extends GenericFilt
         }
         if (StringUtils.isNotEmpty(token)) {
             try {
-                JWTVerifier verifier = JWT.require(Algorithm.HMAC256(securityProperties.getAuthorizationSecret()))
+                JWTVerifier verifier = JWT.require(Algorithm.HMAC256(securityProperty.getAuthorizationSecret()))
                         .acceptLeeway(30)
                         .build();
                 DecodedJWT jwt = verifier.verify(token);

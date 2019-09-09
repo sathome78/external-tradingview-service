@@ -10,7 +10,7 @@ import me.exrates.externalservice.exceptions.AuthorizationException;
 import me.exrates.externalservice.exceptions.InvalidCodeException;
 import me.exrates.externalservice.exceptions.conflict.EmailExistException;
 import me.exrates.externalservice.exceptions.notfound.UserNotFoundException;
-import me.exrates.externalservice.properties.SecurityProperties;
+import me.exrates.externalservice.properties.SecurityProperty;
 import me.exrates.externalservice.repositories.UserRepository;
 import me.exrates.externalservice.services.MailSenderService;
 import me.exrates.externalservice.services.UserService;
@@ -40,19 +40,19 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final TransactionAfterCommitExecutor afterCommitExecutor;
     private final MailSenderService mailSenderService;
-    private final SecurityProperties securityProperties;
+    private final SecurityProperty securityProperty;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            TransactionAfterCommitExecutor afterCommitExecutor,
                            MailSenderService mailSenderService,
-                           SecurityProperties securityProperties) {
+                           SecurityProperty securityProperty) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.afterCommitExecutor = afterCommitExecutor;
         this.mailSenderService = mailSenderService;
-        this.securityProperties = securityProperties;
+        this.securityProperty = securityProperty;
     }
 
     @Transactional(readOnly = true)
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
         String accessToken = JWT.create()
                 .withSubject(user.getLogin())
                 .withExpiresAt(Date.from(expireTime.atZone(ZoneOffset.systemDefault()).toInstant()))
-                .sign(Algorithm.HMAC256(securityProperties.getAuthorizationSecret()));
+                .sign(Algorithm.HMAC256(securityProperty.getAuthorizationSecret()));
 
         return new JwtTokenDto(accessToken, Timestamp.valueOf(expireTime).getTime(), true);
     }

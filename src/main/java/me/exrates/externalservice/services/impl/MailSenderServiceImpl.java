@@ -3,7 +3,7 @@ package me.exrates.externalservice.services.impl;
 import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.entities.enums.EmailType;
-import me.exrates.externalservice.properties.EmailProperties;
+import me.exrates.externalservice.properties.EmailProperty;
 import me.exrates.externalservice.services.MailSenderService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +26,15 @@ public class MailSenderServiceImpl implements MailSenderService {
 
     private final JavaMailSender mailSender;
     private final Configuration fmConfiguration;
-    private final EmailProperties emailProperties;
+    private final EmailProperty emailProperty;
 
     @Autowired
     public MailSenderServiceImpl(JavaMailSender mailSender,
                                  Configuration fmConfiguration,
-                                 EmailProperties emailProperties) {
+                                 EmailProperty emailProperty) {
         this.mailSender = mailSender;
         this.fmConfiguration = fmConfiguration;
-        this.emailProperties = emailProperties;
+        this.emailProperty = emailProperty;
     }
 
     @Async
@@ -56,9 +56,9 @@ public class MailSenderServiceImpl implements MailSenderService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             try {
                 MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-                helper.setFrom(new InternetAddress(emailProperties.getAddress(), emailProperties.getName()));
+                helper.setFrom(new InternetAddress(emailProperty.getAddress(), emailProperty.getName()));
                 helper.setTo(to);
-                helper.setSubject(StringUtils.join(emailProperties.getTitlePrefix(), title));
+                helper.setSubject(StringUtils.join(emailProperty.getTitlePrefix(), title));
                 helper.setText(text, true);
             } catch (Exception ex) {
                 log.error("Messaging exception during setting MimeMessageHelper fields", ex);

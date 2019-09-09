@@ -1,5 +1,7 @@
 package me.exrates.externalservice.configurations;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,10 +17,19 @@ import java.util.stream.Collectors;
 @Configuration
 public class ApplicationConfiguration {
 
+    public static final String JSON_MAPPER = "jsonMapper";
+
     public static final String ALLOWED_RESOLUTIONS_LIST = "allowedIntervalsList";
 
     @Value("${application.allowed-resolutions}")
     private String allowedResolutionsString;
+
+    @Bean(JSON_MAPPER)
+    public ObjectMapper mapper() {
+        return new ObjectMapper()
+                .findAndRegisterModules()
+                .registerModule(new JavaTimeModule());
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

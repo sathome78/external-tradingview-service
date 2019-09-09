@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static me.exrates.externalservice.configurations.ApplicationConfiguration.ALLOWED_RESOLUTIONS_LIST;
 
@@ -35,7 +37,10 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
 
     @Override
     public List<QuotesDto> getQuotes(List<String> symbols) {
-        return publicApi.getTickerInfoCached(symbols);
+        return symbols.stream()
+                .map(symbol -> QuotesDto.of(symbol, publicApi.getTickerInfoCached(symbol)))
+                .filter(quotesDto -> Objects.nonNull(quotesDto.getPrice()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -52,6 +57,11 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
         }
 
         return publicApi.getCandleChartDataCached(symbol, resolutionDto, fromDate, toDate);
+    }
+
+    @Override
+    public Map<String, String> getCurrencyPairs() {
+        return publicApi.getCurrencyPairsCached();
     }
 
     private void checkResolution(ResolutionDto resolutionDto) {

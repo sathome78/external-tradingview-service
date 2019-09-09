@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
-import me.exrates.externalservice.dto.CandleDto;
 
 import java.util.List;
 
@@ -14,6 +13,6 @@ import java.util.List;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class CandleChartResponse {
 
-    private List<CandleDto> body;
+    private List<Candle> body;
     private List<String> errors;
 }

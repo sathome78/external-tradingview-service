@@ -1,35 +1,44 @@
 package me.exrates.externalservice.dto;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import me.exrates.externalservice.api.models.Candle;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
-@Getter
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@Builder(builderClassName = "Builder", toBuilder = true)
+@Data
+@Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @AllArgsConstructor
 public class CandleDto {
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime time;
+    @JsonProperty("id")
+    private String symbol;
+    @JsonProperty("c")
     private BigDecimal close;
+    @JsonProperty("o")
     private BigDecimal open;
+    @JsonProperty("h")
     private BigDecimal high;
+    @JsonProperty("l")
     private BigDecimal low;
+    @JsonProperty("v")
     private BigDecimal volume;
+    @JsonProperty("f")
+    private String type;
+
+    public static CandleDto of(String symbol, Candle candle) {
+        return CandleDto.builder()
+                .symbol(symbol)
+                .close(candle.getClose())
+                .open(candle.getOpen())
+                .high(candle.getHigh())
+                .low(candle.getLow())
+                .volume(candle.getVolume())
+                .type("d")
+                .build();
+    }
 }

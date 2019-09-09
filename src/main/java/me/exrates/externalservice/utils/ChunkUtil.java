@@ -11,6 +11,12 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class ChunkUtil {
 
+    private static final String DEFAULT_SEPARATOR = "\n";
+
+    public static String split(List<String> values) throws IOException {
+        return split(values, DEFAULT_SEPARATOR);
+    }
+
     public static String split(List<String> values, String separator) throws IOException {
         String result = StringUtils.EMPTY;
         for (String value : values) {
