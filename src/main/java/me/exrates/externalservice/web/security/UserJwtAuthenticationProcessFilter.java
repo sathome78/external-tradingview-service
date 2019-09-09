@@ -1,7 +1,7 @@
 package me.exrates.externalservice.web.security;
 
 import me.exrates.externalservice.exceptions.notfound.UserNotFoundException;
-import me.exrates.externalservice.properties.SecurityProperties;
+import me.exrates.externalservice.properties.SecurityProperty;
 import me.exrates.externalservice.services.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -9,9 +9,9 @@ public class UserJwtAuthenticationProcessFilter extends AbstractJwtAuthenticatio
 
     private final UserService userService;
 
-    public UserJwtAuthenticationProcessFilter(SecurityProperties securityProperties,
+    public UserJwtAuthenticationProcessFilter(SecurityProperty securityProperty,
                                               UserService userService) {
-        super(securityProperties);
+        super(securityProperty);
         this.userService = userService;
     }
 

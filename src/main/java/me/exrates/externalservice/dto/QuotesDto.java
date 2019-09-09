@@ -21,10 +21,10 @@ public class QuotesDto {
     @JsonProperty("v")
     private PriceDto price;
 
-    public static QuotesDto of(String pair, TickerResponse response) {
+    public static QuotesDto of(String symbol, TickerResponse response) {
         return QuotesDto.builder()
                 .status(ResStatus.OK.getStatus())
-                .pair(pair)
+                .pair(symbol)
                 .price(PriceDto.of(response))
                 .build();
     }

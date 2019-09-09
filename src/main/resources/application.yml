@@ -56,6 +56,19 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+#  rabbitmq:
+#    username: developer
+#    password: eehei4AeJein
+#    host: rabbitmq-dev.service
+#    port: 5672
+#    trades-topic: CHART_DATA_QUEUE_DEV
+  rabbitmq:
+    username: guest
+    password: guest
+    host: 127.0.0.1
+    port: 5672
+    trades-topic: EXTERNAL_SERVICE_TRADES_QUEUE
+    orders-topic: EXTERNAL_SERVICE_ORDERS_QUEUE
 
 application:
   security:

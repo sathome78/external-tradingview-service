@@ -1,6 +1,6 @@
 package me.exrates.externalservice.configurations;
 
-import me.exrates.externalservice.properties.SecurityProperties;
+import me.exrates.externalservice.properties.SecurityProperty;
 import me.exrates.externalservice.services.UserService;
 import me.exrates.externalservice.web.RestAccessDeniedHandler;
 import me.exrates.externalservice.web.RestAuthenticationEntryPoint;
@@ -28,8 +28,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                                  RestAccessDeniedHandler accessDeniedHandler,
                                  RestAuthenticationEntryPoint authenticationEntryPoint,
                                  RestAuthenticationProvider authenticationProvider,
-                                 SecurityProperties securityProperties) {
-        this.authenticationProcessFilter = new UserJwtAuthenticationProcessFilter(securityProperties, userService);
+                                 SecurityProperty securityProperty) {
+        this.authenticationProcessFilter = new UserJwtAuthenticationProcessFilter(securityProperty, userService);
         this.accessDeniedHandler = accessDeniedHandler;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.authenticationProvider = authenticationProvider;

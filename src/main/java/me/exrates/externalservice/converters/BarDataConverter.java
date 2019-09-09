@@ -3,7 +3,7 @@ package me.exrates.externalservice.converters;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import me.exrates.externalservice.dto.CandleDto;
+import me.exrates.externalservice.api.models.Candle;
 import me.exrates.externalservice.entities.enums.ResStatus;
 
 import java.math.BigDecimal;
@@ -18,8 +18,8 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class BarDataConverter {
 
-    public static Map<String, Object> convert(List<CandleDto> data) {
-        data.sort(Comparator.comparing(CandleDto::getTime));
+    public static Map<String, Object> convert(List<Candle> data) {
+        data.sort(Comparator.comparing(Candle::getTime));
 
         List<Long> t = new ArrayList<>();
         List<BigDecimal> o = new ArrayList<>();
