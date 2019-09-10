@@ -1,17 +1,15 @@
 package me.exrates.externalservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.serializers.LocalDateTimeToLongSerializer;
-import me.exrates.externalservice.serializers.LongToLocalDateTimeDeserializer;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.util.Objects;
 
 @Data
 @Builder(builderClassName = "Builder")
@@ -26,9 +24,21 @@ public class OrderDto {
     @JsonProperty("s")
     private BigDecimal volume;
     @JsonProperty("t")
-    @JsonSerialize(using = LocalDateTimeToLongSerializer.class)
-    @JsonDeserialize(using = LongToLocalDateTimeDeserializer.class)
-    private LocalDateTime createDate;
+    private Long createDate;
     @JsonProperty("f")
     private String type;
+
+    public static OrderDto of(ExternalOrderDto orderDto) {
+        return OrderDto.builder()
+                .pair(Objects.nonNull(orderDto.getPairName())
+                        ? orderDto.getPairName().replace("/", StringUtils.EMPTY)
+                        : null)
+                .price(orderDto.getExrate())
+                .volume(orderDto.getAmountBase())
+                .createDate(Objects.nonNull(orderDto.getCreateDate())
+                        ? Timestamp.valueOf(orderDto.getCreateDate()).getTime()
+                        : null)
+                .type(orderDto.getOperationType().equalsIgnoreCase("BUY") ? "a" : "b")
+                .build();
+    }
 }

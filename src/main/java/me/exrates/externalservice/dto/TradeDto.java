@@ -1,17 +1,15 @@
 package me.exrates.externalservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.serializers.LocalDateTimeToLongSerializer;
-import me.exrates.externalservice.serializers.LongToLocalDateTimeDeserializer;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.util.Objects;
 
 @Data
 @Builder(builderClassName = "Builder")
@@ -26,9 +24,21 @@ public class TradeDto {
     @JsonProperty("s")
     private BigDecimal volume;
     @JsonProperty("t")
-    @JsonSerialize(using = LocalDateTimeToLongSerializer.class)
-    @JsonDeserialize(using = LongToLocalDateTimeDeserializer.class)
-    private LocalDateTime acceptDate;
+    private Long acceptDate;
     @JsonProperty("f")
     private String type;
+
+    public static TradeDto of(ExternalOrderDto orderDto) {
+        return TradeDto.builder()
+                .pair(Objects.nonNull(orderDto.getPairName())
+                        ? orderDto.getPairName().replace("/", StringUtils.EMPTY)
+                        : null)
+                .price(orderDto.getExrate())
+                .volume(orderDto.getAmountBase())
+                .acceptDate(Objects.nonNull(orderDto.getAcceptDate())
+                        ? Timestamp.valueOf(orderDto.getAcceptDate()).getTime()
+                        : null)
+                .type("t")
+                .build();
+    }
 }
