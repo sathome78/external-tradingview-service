@@ -5,34 +5,35 @@ import me.exrates.externalservice.api.ExratesPublicApi;
 import me.exrates.externalservice.api.models.CandleChartResponse;
 import me.exrates.externalservice.dto.QuotesDto;
 import me.exrates.externalservice.dto.ResolutionDto;
-import me.exrates.externalservice.exceptions.UnsupportedResolutionException;
 import me.exrates.externalservice.services.DataIntegrationService;
+import me.exrates.externalservice.utils.ResolutionUtil;
 import me.exrates.externalservice.utils.TimeUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
-
-import static me.exrates.externalservice.configurations.ApplicationConfiguration.ALLOWED_RESOLUTIONS_LIST;
 
 @Slf4j
 @Service
 public class DataIntegrationServiceImpl implements DataIntegrationService {
 
-    private final List<String> allowedResolutions;
+    private final BlockingQueue<String> bufferQueue = new LinkedBlockingDeque<>();
 
     private final ExratesPublicApi publicApi;
+    private final ResolutionUtil resolutionUtil;
 
     @Autowired
-    public DataIntegrationServiceImpl(@Qualifier(ALLOWED_RESOLUTIONS_LIST) List<String> allowedResolutions,
-                                      ExratesPublicApi publicApi) {
-        this.allowedResolutions = allowedResolutions;
+    public DataIntegrationServiceImpl(ExratesPublicApi publicApi,
+                                      ResolutionUtil resolutionUtil) {
         this.publicApi = publicApi;
+        this.resolutionUtil = resolutionUtil;
     }
 
     @Override
@@ -44,30 +45,37 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
     }
 
     @Override
-    public CandleChartResponse getHistory(String symbol, String resolution, long from, long to, int countback) {
-        ResolutionDto resolutionDto = TimeUtil.getResolution(resolution);
-
-        checkResolution(resolutionDto);
-
-        LocalDateTime fromDate = TimeUtil.convert(from);
-        LocalDateTime toDate = TimeUtil.convert(to);
+    public CandleChartResponse getHistory(String symbol, ResolutionDto resolutionDto, LocalDateTime fromDate, LocalDateTime toDate, Integer countback) {
+        resolutionUtil.check(resolutionDto);
 
         if (Objects.nonNull(countback)) {
             fromDate = toDate.minusMinutes(countback * TimeUtil.convertToMinutes(resolutionDto));
         }
-
         return publicApi.getCandleChartDataCached(symbol, resolutionDto, fromDate, toDate);
     }
 
     @Override
-    public Map<String, String> getCurrencyPairs() {
-        return publicApi.getCurrencyPairsCached();
+    public String getLongPoolingResult() {
+        StringBuilder result = new StringBuilder(StringUtils.EMPTY);
+
+        while (!bufferQueue.isEmpty()) {
+            try {
+                result.append(bufferQueue.take());
+                result.append("\n");
+            } catch (InterruptedException ex) {
+                log.error("Interrupted exception occurred");
+            }
+        }
+        return result.toString();
     }
 
-    private void checkResolution(ResolutionDto resolutionDto) {
-        allowedResolutions.stream()
-                .filter(resolution -> resolution.equals(resolutionDto.toString()))
-                .findFirst()
-                .orElseThrow(() -> new UnsupportedResolutionException(resolutionDto.toString()));
+    @Override
+    public BlockingQueue<String> getBufferQueue() {
+        return bufferQueue;
+    }
+
+    @Override
+    public Map<String, String> getPairs() {
+        return publicApi.getCurrencyPairsCached();
     }
 }

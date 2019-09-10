@@ -3,7 +3,6 @@ package me.exrates.externalservice.services.messaging;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
-import me.exrates.externalservice.api.ExratesPublicApi;
 import me.exrates.externalservice.api.models.Candle;
 import me.exrates.externalservice.api.models.CandleChartResponse;
 import me.exrates.externalservice.dto.CandleDto;
@@ -11,7 +10,7 @@ import me.exrates.externalservice.dto.OrderDto;
 import me.exrates.externalservice.dto.ResolutionDto;
 import me.exrates.externalservice.dto.TradeDto;
 import me.exrates.externalservice.entities.enums.ResolutionType;
-import me.exrates.externalservice.services.LongPoolingEventService;
+import me.exrates.externalservice.services.DataIntegrationService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +28,13 @@ import static me.exrates.externalservice.configurations.ApplicationConfiguration
 @Component
 public class RabbitListeners {
 
-    private final LongPoolingEventService longPoolingEventService;
-    private final ExratesPublicApi publicApi;
+    private final DataIntegrationService integrationService;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public RabbitListeners(LongPoolingEventService longPoolingEventService,
-                           ExratesPublicApi publicApi,
+    public RabbitListeners(DataIntegrationService integrationService,
                            @Qualifier(JSON_MAPPER) ObjectMapper objectMapper) {
-        this.longPoolingEventService = longPoolingEventService;
-        this.publicApi = publicApi;
+        this.integrationService = integrationService;
         this.objectMapper = objectMapper;
     }
 
@@ -49,17 +45,18 @@ public class RabbitListeners {
         final String symbol = message.getPair().replace(DELIMITER, StringUtils.EMPTY);
 
         message.setPair(symbol);
-        longPoolingEventService.getBufferQueue().add(serialisePayload(message));
+        integrationService.getBufferQueue().add(serialisePayload(message));
 
         final ResolutionDto resolution = new ResolutionDto(ResolutionType.DAY, 1);
         final LocalDateTime fromDate = LocalDateTime.now();
         final LocalDateTime toDate = fromDate.plusDays(1);
+
         try {
-            CandleChartResponse data = publicApi.getCandleChartData(symbol, resolution, fromDate, toDate);
+            CandleChartResponse data = integrationService.getHistory(symbol, resolution, fromDate, toDate, null);
 
             List<Candle> candlesList = data.getBody();
             if (!CollectionUtils.isEmpty(candlesList)) {
-                longPoolingEventService.getBufferQueue().add(serialisePayload(CandleDto.of(symbol, candlesList.get(0))));
+                integrationService.getBufferQueue().add(serialisePayload(CandleDto.of(symbol, candlesList.get(0))));
             }
         } catch (Exception ex) {
             log.error("Could not get candle data for pair: {}", symbol);
@@ -73,7 +70,7 @@ public class RabbitListeners {
         final String symbol = message.getPair().replace(DELIMITER, StringUtils.EMPTY);
 
         message.setPair(symbol);
-        longPoolingEventService.getBufferQueue().add(serialisePayload(message));
+        integrationService.getBufferQueue().add(serialisePayload(message));
     }
 
     private String serialisePayload(final Object messagePayload) {

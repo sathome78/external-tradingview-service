@@ -38,7 +38,7 @@ public final class BarDataConverter {
         });
 
         Map<String, Object> response = new HashMap<>();
-        response.put("s", ResStatus.OK);
+        response.put("s", ResStatus.OK.getStatus());
         response.put("t", t);
         response.put("o", o);
         response.put("c", c);
