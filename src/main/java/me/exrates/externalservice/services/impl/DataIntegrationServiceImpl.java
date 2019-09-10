@@ -39,7 +39,7 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
     @Override
     public List<QuotesDto> getQuotes(List<String> symbols) {
         return symbols.stream()
-                .map(symbol -> QuotesDto.of(symbol, publicApi.getTickerInfoCached(symbol)))
+                .map(symbol -> QuotesDto.of(symbol, publicApi.getTickerInfo(symbol)))
                 .filter(quotesDto -> Objects.nonNull(quotesDto.getPrice()))
                 .collect(Collectors.toList());
     }
@@ -51,7 +51,7 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
         if (Objects.nonNull(countback)) {
             fromDate = toDate.minusMinutes(countback * TimeUtil.convertToMinutes(resolutionDto));
         }
-        return publicApi.getCandleChartDataCached(symbol, resolutionDto, fromDate, toDate);
+        return publicApi.getCandleChartData(symbol, resolutionDto, fromDate, toDate);
     }
 
     @Override

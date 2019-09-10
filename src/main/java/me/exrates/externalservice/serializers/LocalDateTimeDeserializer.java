@@ -13,7 +13,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-
+import java.util.Objects;
 
 public class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
 
@@ -22,7 +22,7 @@ public class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
     @Override
     public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
         String raw = jsonParser.getValueAsString();
-        if (StringUtils.isEmpty(raw)) {
+        if (Objects.isNull(raw) || StringUtils.isEmpty(raw)) {
             return null;
         }
         String str = raw.replaceAll("\"", "");
@@ -35,7 +35,6 @@ public class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
                 } catch (DateTimeParseException ex) {
                     return LocalDateTime.parse(str, FORMATTER);
                 }
-                //Additional catch block for InOut microservice
             } catch (DateTimeParseException ex){
                 String[] dateTime = str.split(" ");
                 return LocalDateTime.of(LocalDate.parse(dateTime[0]), LocalTime.parse(dateTime[1]));

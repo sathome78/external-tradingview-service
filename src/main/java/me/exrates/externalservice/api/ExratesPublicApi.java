@@ -8,7 +8,6 @@ import me.exrates.externalservice.api.models.TickerResponse;
 import me.exrates.externalservice.api.models.TradeHistoryResponse;
 import me.exrates.externalservice.dto.ResolutionDto;
 import me.exrates.externalservice.exceptions.api.ExratesApiException;
-import me.exrates.externalservice.utils.KeyGeneratorUtil;
 import me.exrates.externalservice.utils.QueryBuilderUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,43 +30,30 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static me.exrates.externalservice.configurations.CacheConfiguration.CACHE_CANDLE_CHART_DATA;
 import static me.exrates.externalservice.configurations.CacheConfiguration.CACHE_CURRENCY_PAIRS;
-import static me.exrates.externalservice.configurations.CacheConfiguration.CACHE_TICKER_INFO;
 
 @Slf4j
 @Component
 public class ExratesPublicApi {
 
     private static final String ALL = "All";
-    public static final String DELIMITER = "/";
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd_MM_yyyy_HH_mm_ss");
 
     private final String url;
 
     private final Cache currencyPairsCache;
-    private final Cache tickerInfoCache;
-    private final Cache candleChartDataCache;
     private final RestTemplate restTemplate;
 
     @Autowired
     public ExratesPublicApi(@Value("${api.exrates.url}") String url,
-                            @Qualifier(CACHE_CURRENCY_PAIRS) Cache currencyPairsCache,
-                            @Qualifier(CACHE_TICKER_INFO) Cache tickerInfoCache,
-                            @Qualifier(CACHE_CANDLE_CHART_DATA) Cache candleChartDataCache) {
+                            @Qualifier(CACHE_CURRENCY_PAIRS) Cache currencyPairsCache) {
         this.url = url;
         this.currencyPairsCache = currencyPairsCache;
-        this.tickerInfoCache = tickerInfoCache;
-        this.candleChartDataCache = candleChartDataCache;
         this.restTemplate = new RestTemplate();
     }
 
-    public TickerResponse getTickerInfoCached(@NotNull String symbol) {
-        return tickerInfoCache.get(symbol, () -> getTickerInfo(symbol));
-    }
-
-    private TickerResponse getTickerInfo(@NotNull String symbol) {
+    public TickerResponse getTickerInfo(@NotNull String symbol) {
         ResponseEntity<TickerResponse[]> responseEntity = restTemplate.getForEntity(String.format("%s/public/ticker?currency_pair=%s", url, convert(symbol)), TickerResponse[].class);
         if (responseEntity.getStatusCodeValue() != 200) {
             throw new ExratesApiException("Exrates server is not available");
@@ -78,17 +64,6 @@ public class ExratesPublicApi {
             return null;
         }
         return Arrays.asList(body).get(0);
-    }
-
-    public CandleChartResponse getCandleChartDataCached(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
-                                                        @NotNull LocalDateTime fromDate, @NotNull LocalDateTime toDate) {
-        final String cacheKey = KeyGeneratorUtil.generate(DELIMITER,
-                symbol,
-                resolutionDto.toString(),
-                fromDate.format(FORMATTER),
-                toDate.format(FORMATTER));
-
-        return candleChartDataCache.get(cacheKey, () -> getCandleChartData(symbol, resolutionDto, fromDate, toDate));
     }
 
     public CandleChartResponse getCandleChartData(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
@@ -150,7 +125,7 @@ public class ExratesPublicApi {
             return Collections.emptyMap();
         }
         return Stream.of(body)
-                .map(currencyPairDto -> Pair.of(currencyPairDto.getName().replace(DELIMITER, StringUtils.EMPTY), currencyPairDto.getUrlSymbol()))
+                .map(currencyPairDto -> Pair.of(currencyPairDto.getName().replace("/", StringUtils.EMPTY), currencyPairDto.getUrlSymbol()))
                 .collect(Collectors.toMap(
                         Pair::getKey,
                         Pair::getValue,
