@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.api.models.Candle;
 import me.exrates.externalservice.api.models.CandleChartResponse;
 import me.exrates.externalservice.converters.BarDataConverter;
+import me.exrates.externalservice.converters.SymbolInfoConverter;
 import me.exrates.externalservice.dto.QuotesDto;
+import me.exrates.externalservice.dto.ResolutionDto;
 import me.exrates.externalservice.entities.enums.ResStatus;
 import me.exrates.externalservice.services.DataIntegrationService;
-import me.exrates.externalservice.services.LongPoolingEventService;
+import me.exrates.externalservice.utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
@@ -17,12 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static me.exrates.externalservice.api.ExratesPublicApi.FORMATTER;
 
@@ -32,13 +36,10 @@ import static me.exrates.externalservice.api.ExratesPublicApi.FORMATTER;
 public class DataIntegrationController {
 
     private final DataIntegrationService integrationService;
-    private final LongPoolingEventService longPoolingEventService;
 
     @Autowired
-    public DataIntegrationController(DataIntegrationService integrationService,
-                                     LongPoolingEventService longPoolingEventService) {
+    public DataIntegrationController(DataIntegrationService integrationService) {
         this.integrationService = integrationService;
-        this.longPoolingEventService = longPoolingEventService;
     }
 
     @GetMapping(value = "/quotes", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,13 +61,17 @@ public class DataIntegrationController {
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getHistory(@RequestParam String symbol,
                                           @RequestParam String resolution,
-                                          @RequestParam long from,
-                                          @RequestParam long to,
-                                          @RequestParam(required = false) int countback) {
+                                          @RequestParam Long from,
+                                          @RequestParam Long to,
+                                          @RequestParam(required = false) Integer countback) {
+        final ResolutionDto resolutionDto = TimeUtil.getResolution(resolution);
+        final LocalDateTime fromDate = TimeUtil.convert(from);
+        final LocalDateTime toDate = TimeUtil.convert(to);
+
         Map<String, Object> response = new HashMap<>();
 
         try {
-            CandleChartResponse data = integrationService.getHistory(symbol, resolution, from, to, countback);
+            CandleChartResponse data = integrationService.getHistory(symbol, resolutionDto, fromDate, toDate, countback);
 
             List<Candle> candlesList = data.getBody();
             if (CollectionUtils.isEmpty(candlesList)) {
@@ -94,7 +99,7 @@ public class DataIntegrationController {
             try {
                 TimeUnit.SECONDS.sleep(1);
 
-                deferredResult.setResult(longPoolingEventService.getResult());
+                deferredResult.setResult(integrationService.getLongPoolingResult());
             } catch (Exception ex) {
                 log.error("Interrupted exception occurred");
             }
@@ -102,10 +107,22 @@ public class DataIntegrationController {
         return deferredResult;
     }
 
-    @GetMapping("/symbol_info")
-    public String getSymbolInfo() {
-        Map<String, String> pairs = integrationService.getCurrencyPairs();
+    @GetMapping(value = "/symbol_info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> getSymbolInfo() {
+        Map<String, Object> response = new HashMap<>();
 
-        return null;
+        try {
+            Map<String, String> pairs = integrationService.getPairs()
+                    .entrySet().stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            entry -> entry.getValue().replace("_", "/").toUpperCase()));
+
+            response.putAll(SymbolInfoConverter.convert(pairs));
+        } catch (Exception ex) {
+            response.put("s", ResStatus.ERROR.getStatus());
+            response.put("errmsg", ex.getMessage());
+        }
+        return response;
     }
 }
