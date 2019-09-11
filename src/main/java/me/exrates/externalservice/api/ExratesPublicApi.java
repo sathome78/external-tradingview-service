@@ -60,7 +60,7 @@ public class ExratesPublicApi {
         }
 
         TickerResponse[] body = responseEntity.getBody();
-        if (Objects.isNull(body)) {
+        if (Objects.isNull(body) || body.length == 0) {
             return null;
         }
         return Arrays.asList(body).get(0);

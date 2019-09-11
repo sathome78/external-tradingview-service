@@ -90,4 +90,5 @@ application:
 
 api:
   exrates:
-    url: http://172.31.14.167:8080/openapi/v1
+#    url: http://172.31.14.167:8080/openapi/v1
+    url: http://localhost:8080/openapi/v1

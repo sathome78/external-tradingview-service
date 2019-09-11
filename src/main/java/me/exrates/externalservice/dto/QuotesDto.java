@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import me.exrates.externalservice.api.models.TickerResponse;
 import me.exrates.externalservice.entities.enums.ResStatus;
 
+import java.util.Objects;
+
 @Data
 @Builder(builderClassName = "Builder", toBuilder = true)
 @NoArgsConstructor
@@ -25,7 +27,7 @@ public class QuotesDto {
         return QuotesDto.builder()
                 .status(ResStatus.OK.getStatus())
                 .pair(symbol)
-                .price(PriceDto.of(response))
+                .price(Objects.nonNull(response) ? PriceDto.of(response) : null)
                 .build();
     }
 }

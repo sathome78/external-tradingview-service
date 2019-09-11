@@ -14,8 +14,8 @@ import java.util.List;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class OrderBookResponse {
 
-    @JsonProperty("SELL")
-    private List<Bid> bids;
     @JsonProperty("BUY")
+    private List<Bid> bids;
+    @JsonProperty("SELL")
     private List<Ask> asks;
 }
