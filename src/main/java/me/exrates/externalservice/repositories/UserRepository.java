@@ -1,9 +1,15 @@
 package me.exrates.externalservice.repositories;
 
-import me.exrates.externalservice.entities.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import me.exrates.externalservice.entities.UserDto;
+import me.exrates.externalservice.entities.enums.UserStatus;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository {
 
-    User findByLogin(String login);
+    UserDto findByLogin(String login);
+
+    void save(UserDto user);
+
+    void updateCode(int userId, String code);
+
+    void updateStatus(String login, UserStatus status);
 }

@@ -6,42 +6,16 @@ spring:
     admin:
       enabled: true
     name: external-service
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/external?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+#    username: root
+#    password: root
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/external?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-    username: root
-    password: root
-    hikari:
-      connection-timeout: 10000
-      idle-timeout: 180000
-      max-lifetime: 600000
-      connection-init-sql: SELECT 1;
-      connection-test-query: SELECT 2;
-      minimum-idle: 5
-      maximum-pool-size: 200
-      validation-timeout: 5000
-  jpa:
-    hibernate:
-      ddl-auto: none
-    database: mysql
-    properties:
-      hibernate:
-        search:
-          default:
-            directory_provider: filesystem
-            indexBase: indexes/
-        jdbc:
-          batch_size: 50
-          batch_versioned_data: true
-        order_inserts: true
-        order_update: true
-        enable_lazy_load_no_trans: true
-      show_sql: true
-      format_sql: true
-    open-in-view: false
-#  redis:
-#    host: 172.10.10.236
-#    port: 6379
+    url: jdbc:mysql://exdbdev.cedlveyttji9.us-east-2.rds.amazonaws.com:3306/dbdev2?autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: exdevdb
+    password: KQmK82dd
   jackson:
     serialization:
       write_dates_as_timestamps: false
@@ -71,9 +45,9 @@ spring:
     orders-topic: EXTERNAL_SERVICE_ORDERS_QUEUE
 
 application:
+  base-url: http://localhost:8081
   security:
     authorization-secret: external-service-2019
-  base-url: http://localhost:4200
   email:
     address: oleg.kostiukevych@upholding.biz
     name: Exrates

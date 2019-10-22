@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum EmailType {
 
-    AUTHORIZATION_2FA_CODE("authorization.ftl", "Two Factor Authorization Code");
+    AUTHORIZATION("authorization.ftl", "Two Factor Authorization Code"),
+    VERIFICATION("verification.ftl", "Successful Registration");
 
     private final String template;
     private final String title;

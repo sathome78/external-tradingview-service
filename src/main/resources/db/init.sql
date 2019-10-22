@@ -5,7 +5,7 @@ CREATE TABLE USER
   password     VARCHAR(80)                    NOT NULL,
   phone        VARCHAR(15) UNIQUE             NOT NULL,
   created_date TIMESTAMP                      NOT NULL,
-  2fa_code     INT(7)
+  2fa_code     VARCHAR(80)
 )
   CHARACTER SET utf8
   COLLATE utf8_general_ci;

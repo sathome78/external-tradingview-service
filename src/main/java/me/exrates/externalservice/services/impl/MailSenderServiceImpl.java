@@ -3,6 +3,7 @@ package me.exrates.externalservice.services.impl;
 import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.entities.enums.EmailType;
+import me.exrates.externalservice.properties.ApplicationProperty;
 import me.exrates.externalservice.properties.EmailProperty;
 import me.exrates.externalservice.services.MailSenderService;
 import org.apache.commons.lang3.StringUtils;
@@ -27,14 +28,17 @@ public class MailSenderServiceImpl implements MailSenderService {
     private final JavaMailSender mailSender;
     private final Configuration fmConfiguration;
     private final EmailProperty emailProperty;
+    private final ApplicationProperty applicationProperty;
 
     @Autowired
     public MailSenderServiceImpl(JavaMailSender mailSender,
                                  Configuration fmConfiguration,
-                                 EmailProperty emailProperty) {
+                                 EmailProperty emailProperty,
+                                 ApplicationProperty applicationProperty) {
         this.mailSender = mailSender;
         this.fmConfiguration = fmConfiguration;
         this.emailProperty = emailProperty;
+        this.applicationProperty = applicationProperty;
     }
 
     @Async
@@ -49,6 +53,7 @@ public class MailSenderServiceImpl implements MailSenderService {
         if (Objects.isNull(properties)) {
             properties = new HashMap<>();
         }
+        properties.put("baseUrl", applicationProperty.getBaseUrl());
 
         String text = geFreeMarkerTemplateFromFile(type.getTemplate(), properties);
 

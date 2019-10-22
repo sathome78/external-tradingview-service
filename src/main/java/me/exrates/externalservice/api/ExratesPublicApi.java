@@ -3,9 +3,7 @@ package me.exrates.externalservice.api;
 import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.api.models.CandleChartResponse;
 import me.exrates.externalservice.api.models.CurrencyPairResponse;
-import me.exrates.externalservice.api.models.OrderBookResponse;
 import me.exrates.externalservice.api.models.TickerResponse;
-import me.exrates.externalservice.api.models.TradeHistoryResponse;
 import me.exrates.externalservice.dto.ResolutionDto;
 import me.exrates.externalservice.exceptions.api.ExratesApiException;
 import me.exrates.externalservice.utils.QueryBuilderUtil;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -76,34 +73,6 @@ public class ExratesPublicApi {
         }
 
         CandleChartResponse body = responseEntity.getBody();
-        if (Objects.isNull(body)) {
-            return null;
-        }
-        return body;
-    }
-
-    public OrderBookResponse getOrderBook(@NotNull String symbol) {
-        ResponseEntity<OrderBookResponse> responseEntity = restTemplate.getForEntity(String.format("%s/public/orderbook/%s", url, convert(symbol)), OrderBookResponse.class);
-        if (responseEntity.getStatusCodeValue() != 200) {
-            throw new ExratesApiException("Exrates server is not available");
-        }
-
-        OrderBookResponse body = responseEntity.getBody();
-        if (Objects.isNull(body)) {
-            return null;
-        }
-        return body;
-    }
-
-    public TradeHistoryResponse getTradeHistory(@NotNull String symbol, @NotNull LocalDate fromDate, @NotNull LocalDate toDate) {
-        final String queryParams = QueryBuilderUtil.build(fromDate, toDate);
-
-        ResponseEntity<TradeHistoryResponse> responseEntity = restTemplate.getForEntity(String.format("%s/public/history/%s?%s", url, convert(symbol), queryParams), TradeHistoryResponse.class);
-        if (responseEntity.getStatusCodeValue() != 200) {
-            throw new ExratesApiException("Exrates server is not available");
-        }
-
-        TradeHistoryResponse body = responseEntity.getBody();
         if (Objects.isNull(body)) {
             return null;
         }

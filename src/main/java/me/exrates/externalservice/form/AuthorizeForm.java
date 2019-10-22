@@ -17,5 +17,5 @@ public class AuthorizeForm {
     @NotEmpty
     private String password;
     @JsonProperty("2faCode")
-    private Integer code;
+    private String code;
 }
