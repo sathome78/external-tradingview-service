@@ -6,16 +6,6 @@ spring:
     admin:
       enabled: true
     name: external-service
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/external?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-#    username: root
-#    password: root
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://exdbdev.cedlveyttji9.us-east-2.rds.amazonaws.com:3306/dbdev2?autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-    username: exdevdb
-    password: KQmK82dd
   jackson:
     serialization:
       write_dates_as_timestamps: false
@@ -43,6 +33,17 @@ spring:
     port: 5672
     trades-topic: EXTERNAL_SERVICE_TRADES_QUEUE
     orders-topic: EXTERNAL_SERVICE_ORDERS_QUEUE
+
+#datasource:
+#  driver-class-name: com.mysql.cj.jdbc.Driver
+#  url: jdbc:mysql://localhost:3306/birzha?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+#  username: root
+#  password: root
+datasource:
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://exdbdev.cedlveyttji9.us-east-2.rds.amazonaws.com:3306/dbdev2?autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+  username: exdevdb
+  password: KQmK82dd
 
 application:
   base-url: http://localhost:8081

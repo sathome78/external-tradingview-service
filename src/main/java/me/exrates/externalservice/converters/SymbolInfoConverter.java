@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import me.exrates.externalservice.entities.enums.ResStatus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,10 @@ import java.util.Map;
 public final class SymbolInfoConverter {
 
     private static final String EXRATES = "EXRATES";
+    private static final String DELIMITER = "/";
+
+    private static final String[] FIAT_LIST = new String[]{"USD", "EUR", "CNY", "IDR", "NGN", "TRY", "UAH", "VND", "AED", "RUB"};
+    private static final String[] RESOLUTIONS = new String[]{"5", "15", "30", "60", "360", "D"};
 
     public static Map<String, Object> convert(Map<String, String> pairs) {
         List<String> symbol = new ArrayList<>();
@@ -33,28 +38,20 @@ public final class SymbolInfoConverter {
         List<Boolean> hasDaily = new ArrayList<>();
         List<Boolean> barFillgaps = new ArrayList<>();
 
-        List<String> resolutions = new ArrayList<>();
-        resolutions.add("5");
-        resolutions.add("15");
-        resolutions.add("30");
-        resolutions.add("60");
-        resolutions.add("360");
-        resolutions.add("D");
-
         pairs.forEach((key, value) -> {
             symbol.add(key);
             description.add(value);
-            currency.add(value.split("/")[1]);
-            baseCurrency.add(value.split("/")[0]);
+            currency.add(value.split(DELIMITER)[1]);
+            baseCurrency.add(value.split(DELIMITER)[0]);
             exchangeListed.add(EXRATES);
             exchangeTraded.add(EXRATES);
             minmovement.add(1L);
-            pricescale.add(100_000_000L);
+            pricescale.add(isFiat(value) ? 100L : 100_000_000L);
             type.add("crypto");
             ticker.add(key);
             timezone.add("Etc/UTC");
             sessionRegular.add("24x7");
-            supportedResolutions.add(resolutions);
+            supportedResolutions.add(Arrays.asList(RESOLUTIONS));
             hasDaily.add(true);
             barFillgaps.add(true);
         });
@@ -78,5 +75,9 @@ public final class SymbolInfoConverter {
         response.put("bar-fillgaps", barFillgaps);
 
         return response;
+    }
+
+    private static boolean isFiat(String pair) {
+        return Arrays.asList(FIAT_LIST).contains(pair.split(DELIMITER)[1]);
     }
 }

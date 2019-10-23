@@ -1,5 +1,6 @@
 package me.exrates.externalservice.configurations;
 
+import me.exrates.externalservice.entities.enums.UserRole;
 import me.exrates.externalservice.properties.SecurityProperty;
 import me.exrates.externalservice.services.UserService;
 import me.exrates.externalservice.web.RestAccessDeniedHandler;
@@ -14,6 +15,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -51,7 +55,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(authenticationProcessFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/api/register/**", "/api/authorize").anonymous()
-                .antMatchers("/api/**").hasRole("USER")
+                .antMatchers("/api/**").hasAnyRole(Stream.of(UserRole.values()).map(UserRole::name).collect(Collectors.joining(",")))
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)

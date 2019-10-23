@@ -44,22 +44,6 @@ public class RabbitListeners {
         final TradeDto tradeDto = TradeDto.of(message);
 
         integrationService.getBufferQueue().add(serialisePayload(tradeDto));
-
-        final String pair = tradeDto.getPair();
-        final ResolutionDto resolution = new ResolutionDto(ResolutionType.DAY, 1);
-        final LocalDateTime fromDate = LocalDateTime.now();
-        final LocalDateTime toDate = fromDate.plusDays(1);
-
-        try {
-            CandleChartResponse data = integrationService.getHistory(pair, resolution, fromDate, toDate, null);
-
-            List<Candle> candlesList = data.getBody();
-            if (!CollectionUtils.isEmpty(candlesList)) {
-                integrationService.getBufferQueue().add(serialisePayload(CandleDto.of(pair, candlesList.get(0))));
-            }
-        } catch (Exception ex) {
-            log.error("Could not get candle data for pair: {}", pair);
-        }
     }
 
     @RabbitListener(id = "${spring.rabbitmq.orders-topic}", queues = "${spring.rabbitmq.orders-topic}")

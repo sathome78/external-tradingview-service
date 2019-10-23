@@ -51,7 +51,12 @@ public class ExratesPublicApi {
     }
 
     public TickerResponse getTickerInfo(@NotNull String symbol) {
-        ResponseEntity<TickerResponse[]> responseEntity = restTemplate.getForEntity(String.format("%s/public/ticker?currency_pair=%s", url, convert(symbol)), TickerResponse[].class);
+        final String convertedSymbol = convert(symbol);
+
+        if (Objects.isNull(convertedSymbol)) {
+            return null;
+        }
+        ResponseEntity<TickerResponse[]> responseEntity = restTemplate.getForEntity(String.format("%s/public/ticker?currency_pair=%s", url, convertedSymbol), TickerResponse[].class);
         if (responseEntity.getStatusCodeValue() != 200) {
             throw new ExratesApiException("Exrates server is not available");
         }
@@ -65,9 +70,14 @@ public class ExratesPublicApi {
 
     public CandleChartResponse getCandleChartData(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
                                                   @NotNull LocalDateTime fromDate, @NotNull LocalDateTime toDate) {
+        final String convertedSymbol = convert(symbol);
+
+        if (Objects.isNull(convertedSymbol)) {
+            return null;
+        }
         final String queryParams = QueryBuilderUtil.build(fromDate, toDate, resolutionDto);
 
-        ResponseEntity<CandleChartResponse> responseEntity = restTemplate.getForEntity(String.format("%s/public/%s/candle_chart?%s", url, convert(symbol), queryParams), CandleChartResponse.class);
+        ResponseEntity<CandleChartResponse> responseEntity = restTemplate.getForEntity(String.format("%s/public/%s/candle_chart?%s", url, convertedSymbol, queryParams), CandleChartResponse.class);
         if (responseEntity.getStatusCodeValue() != 200) {
             throw new ExratesApiException("Exrates server is not available");
         }
