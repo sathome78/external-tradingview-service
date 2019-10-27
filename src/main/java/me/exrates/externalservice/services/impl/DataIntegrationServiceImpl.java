@@ -1,15 +1,17 @@
 package me.exrates.externalservice.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import me.exrates.externalservice.api.ExratesPublicApi;
-import me.exrates.externalservice.api.models.CandleChartResponse;
-import me.exrates.externalservice.dto.QuotesDto;
-import me.exrates.externalservice.dto.ResolutionDto;
+import me.exrates.externalservice.api.ChartApi;
+import me.exrates.externalservice.api.models.CandleResponse;
+import me.exrates.externalservice.converters.BarDataConverter;
+import me.exrates.externalservice.model.QuotesDto;
+import me.exrates.externalservice.model.ResolutionDto;
 import me.exrates.externalservice.services.DataIntegrationService;
 import me.exrates.externalservice.utils.ResolutionUtil;
 import me.exrates.externalservice.utils.TimeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,42 +28,56 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
 
     private final BlockingQueue<String> bufferQueue = new LinkedBlockingDeque<>();
 
-    private final ExratesPublicApi publicApi;
+    private final int resultSize;
+
+    private final ChartApi chartApi;
     private final ResolutionUtil resolutionUtil;
 
     @Autowired
-    public DataIntegrationServiceImpl(ExratesPublicApi publicApi,
+    public DataIntegrationServiceImpl(@Value("${stream.result.size:100}") int resultSize,
+                                      ChartApi chartApi,
                                       ResolutionUtil resolutionUtil) {
-        this.publicApi = publicApi;
+        this.resultSize = resultSize;
+        this.chartApi = chartApi;
         this.resolutionUtil = resolutionUtil;
     }
 
     @Override
-    public List<QuotesDto> getQuotes(List<String> symbols) {
-        return symbols.stream()
-                .map(symbol -> QuotesDto.of(symbol, publicApi.getTickerInfo(symbol)))
+    public List<QuotesDto> getQuotes(Map<String, String> pairs) {
+        return pairs.entrySet().stream()
+                .map(entry -> QuotesDto.of(entry.getKey(), chartApi.getCachedTickerInfo(entry.getValue())))
                 .filter(quotesDto -> Objects.nonNull(quotesDto.getPrice()))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public CandleChartResponse getHistory(String symbol, ResolutionDto resolutionDto, LocalDateTime fromDate, LocalDateTime toDate, Integer countback) {
+    public Map<String, Object> getHistory(String symbol, ResolutionDto resolutionDto, LocalDateTime fromDate, LocalDateTime toDate, Integer countback) {
         resolutionUtil.check(resolutionDto);
 
         if (Objects.nonNull(countback)) {
             fromDate = toDate.minusMinutes(countback * TimeUtil.convertToMinutes(resolutionDto));
         }
-        return publicApi.getCandleChartData(symbol, resolutionDto, fromDate, toDate);
+        List<CandleResponse> data = chartApi.getCandleChartData(symbol, resolutionDto, fromDate, toDate);
+
+        return BarDataConverter.convert(data);
+    }
+
+    @Override
+    public LocalDateTime getLastCandleTimeBeforeDate(String symbol, LocalDateTime date, ResolutionDto resolutionDto) {
+        return chartApi.getLastCandleTimeBeforeDate(symbol, date, resolutionDto);
     }
 
     @Override
     public String getLongPoolingResult() {
         StringBuilder result = new StringBuilder(StringUtils.EMPTY);
 
-        while (!bufferQueue.isEmpty()) {
+        int size = 0;
+        while (!bufferQueue.isEmpty() && size <= resultSize) {
             try {
                 result.append(bufferQueue.take());
                 result.append("\n");
+
+                size++;
             } catch (InterruptedException ex) {
                 log.error("Interrupted exception occurred");
             }
@@ -72,10 +88,5 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
     @Override
     public BlockingQueue<String> getBufferQueue() {
         return bufferQueue;
-    }
-
-    @Override
-    public Map<String, String> getPairs() {
-        return publicApi.getCurrencyPairsCached();
     }
 }

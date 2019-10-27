@@ -1,7 +1,7 @@
 package me.exrates.externalservice.repositories;
 
-import me.exrates.externalservice.entities.UserDto;
-import me.exrates.externalservice.entities.enums.UserStatus;
+import me.exrates.externalservice.model.UserDto;
+import me.exrates.externalservice.model.enums.UserStatus;
 
 public interface UserRepository {
 

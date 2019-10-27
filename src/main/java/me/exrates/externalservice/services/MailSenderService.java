@@ -1,6 +1,7 @@
 package me.exrates.externalservice.services;
 
-import me.exrates.externalservice.entities.enums.EmailType;
+
+import me.exrates.externalservice.model.enums.EmailType;
 
 import java.util.Map;
 

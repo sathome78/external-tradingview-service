@@ -1,4 +1,4 @@
-package me.exrates.externalservice.dto;
+package me.exrates.externalservice.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -39,24 +39,16 @@ public class PriceDto {
     private int sellPipValue;
 
     public static PriceDto of(TickerResponse response) {
-        final double last = response.getLast().doubleValue();
-        final double percentChange = response.getPercentChange().doubleValue();
-        final double changeDouble = last * percentChange / 100;
-        final double previousLastDouble = last - changeDouble;
-
-        final BigDecimal change = BigDecimal.valueOf(changeDouble).setScale(8, RoundingMode.HALF_UP);
-        final BigDecimal previousLast = BigDecimal.valueOf(previousLastDouble).setScale(8, RoundingMode.HALF_UP);
-
         return PriceDto.builder()
-                .change(change)
+                .change(response.getValueChange())
                 .changePercent(response.getPercentChange())
                 .lastPrice(response.getLast())
                 .askPrice(response.getLowestAsk())
                 .bidPrice(response.getHighestBid())
-                .openPrice(previousLast)
-                .highPrice(response.getHigh())
-                .lowPrice(response.getLow())
-                .previousClosePrice(previousLast)
+                .openPrice(response.getFirst())
+                .highPrice(response.getHigh24hr())
+                .lowPrice(response.getLow24hr())
+                .previousClosePrice(response.getFirst())
                 .volume(response.getBaseVolume())
                 .buyPipValue(1)
                 .sellPipValue(1)

@@ -1,13 +1,13 @@
 package me.exrates.externalservice.controllers;
 
-import me.exrates.externalservice.dto.JwtTokenDto;
-import me.exrates.externalservice.entities.UserDto;
-import me.exrates.externalservice.entities.enums.ResStatus;
+import me.exrates.externalservice.model.JwtTokenDto;
+import me.exrates.externalservice.model.UserDto;
 import me.exrates.externalservice.exceptions.ServiceException;
 import me.exrates.externalservice.exceptions.ValidationException;
 import me.exrates.externalservice.exceptions.conflict.EmailExistException;
 import me.exrates.externalservice.form.AuthorizeForm;
 import me.exrates.externalservice.form.RegisterForm;
+import me.exrates.externalservice.model.enums.ResStatus;
 import me.exrates.externalservice.services.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

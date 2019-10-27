@@ -1,4 +1,4 @@
-package me.exrates.externalservice.entities.enums;
+package me.exrates.externalservice.model.enums;
 
 import lombok.Getter;
 

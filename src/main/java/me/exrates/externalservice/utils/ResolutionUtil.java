@@ -1,6 +1,6 @@
 package me.exrates.externalservice.utils;
 
-import me.exrates.externalservice.dto.ResolutionDto;
+import me.exrates.externalservice.model.ResolutionDto;
 import me.exrates.externalservice.exceptions.UnsupportedResolutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

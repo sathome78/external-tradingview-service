@@ -2,7 +2,7 @@ package me.exrates.externalservice.services.impl;
 
 import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
-import me.exrates.externalservice.entities.enums.EmailType;
+import me.exrates.externalservice.model.enums.EmailType;
 import me.exrates.externalservice.properties.ApplicationProperty;
 import me.exrates.externalservice.properties.EmailProperty;
 import me.exrates.externalservice.services.MailSenderService;

@@ -1,6 +1,6 @@
 package me.exrates.externalservice.configurations;
 
-import me.exrates.externalservice.entities.enums.UserRole;
+import me.exrates.externalservice.model.enums.UserRole;
 import me.exrates.externalservice.properties.SecurityProperty;
 import me.exrates.externalservice.services.UserService;
 import me.exrates.externalservice.web.RestAccessDeniedHandler;

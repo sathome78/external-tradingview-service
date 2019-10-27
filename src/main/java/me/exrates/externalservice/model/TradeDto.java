@@ -1,4 +1,4 @@
-package me.exrates.externalservice.dto;
+package me.exrates.externalservice.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.Objects;
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderDto {
+public class TradeDto {
 
     @JsonProperty("id")
     private String pair;
@@ -24,21 +24,21 @@ public class OrderDto {
     @JsonProperty("s")
     private BigDecimal volume;
     @JsonProperty("t")
-    private Long createDate;
+    private Long acceptDate;
     @JsonProperty("f")
     private String type;
 
-    public static OrderDto of(ExternalOrderDto orderDto) {
-        return OrderDto.builder()
-                .pair(Objects.nonNull(orderDto.getPairName())
-                        ? orderDto.getPairName().replace("/", StringUtils.EMPTY)
+    public static TradeDto of(OrderDataDto orderDataDto) {
+        return TradeDto.builder()
+                .pair(Objects.nonNull(orderDataDto.getCurrencyPairName())
+                        ? orderDataDto.getCurrencyPairName().replace("/", StringUtils.EMPTY)
                         : null)
-                .price(orderDto.getExrate())
-                .volume(orderDto.getAmountBase())
-                .createDate(Objects.nonNull(orderDto.getCreateDate())
-                        ? Timestamp.valueOf(orderDto.getCreateDate()).getTime()
+                .price(orderDataDto.getExrate())
+                .volume(orderDataDto.getAmountBase())
+                .acceptDate(Objects.nonNull(orderDataDto.getTradeDate())
+                        ? Timestamp.valueOf(orderDataDto.getTradeDate()).getTime()
                         : null)
-                .type(orderDto.getOperationType().equalsIgnoreCase("BUY") ? "a" : "b")
+                .type("t")
                 .build();
     }
 }

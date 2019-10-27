@@ -2,8 +2,8 @@ package me.exrates.externalservice.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.dto.ResolutionDto;
-import me.exrates.externalservice.entities.enums.ResolutionType;
+import me.exrates.externalservice.model.ResolutionDto;
+import me.exrates.externalservice.model.enums.ResolutionType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -62,7 +62,7 @@ public final class TimeUtil {
             resolutionType = ResolutionType.MINUTE;
             resolutionValue = Integer.valueOf(resolution);
         }
-        return new ResolutionDto(resolutionType, resolutionValue);
+        return new ResolutionDto(resolutionValue, resolutionType);
     }
 
     private static int getValue(String resolution, String type) {

@@ -25,14 +25,13 @@ spring:
 #    password: eehei4AeJein
 #    host: rabbitmq-dev.service
 #    port: 5672
-#    trades-topic: CHART_DATA_QUEUE_DEV
+#    trades-topic: EXTERNAL_DATA_QUEUE_DEV
   rabbitmq:
     username: guest
     password: guest
     host: 127.0.0.1
     port: 5672
-    trades-topic: EXTERNAL_SERVICE_TRADES_QUEUE
-    orders-topic: EXTERNAL_SERVICE_ORDERS_QUEUE
+    trades-topic: EXTERNAL_DATA_QUEUE
 
 #datasource:
 #  driver-class-name: com.mysql.cj.jdbc.Driver
@@ -63,7 +62,13 @@ application:
     6 HOUR;
     1 DAY;
 
+stream.result.size: 100
+
+#api:
+#  chart:
+#    url: http://chart-service-dev.service:4104/data
+#    coinmarketcap-url: http://chart-service-dev.service:4104/coinmarketcap
 api:
-  exrates:
-#    url: http://172.31.14.167:8080/openapi/v1
-    url: http://localhost:8080/openapi/v1
+  chart:
+    url: http://localhost:8060/data
+    coinmarketcap-url: http://localhost:8060/coinmarketcap

@@ -1,7 +1,7 @@
 package me.exrates.externalservice.form;
 
 import lombok.Data;
-import me.exrates.externalservice.entities.enums.UserRole;
+import me.exrates.externalservice.model.enums.UserRole;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;

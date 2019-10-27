@@ -3,7 +3,7 @@ package me.exrates.externalservice.converters;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import me.exrates.externalservice.entities.enums.ResStatus;
+import me.exrates.externalservice.model.enums.ResStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;

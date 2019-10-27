@@ -1,4 +1,4 @@
-package me.exrates.externalservice.dto;
+package me.exrates.externalservice.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -16,16 +16,18 @@ import java.time.LocalDateTime;
 @Builder(builderClassName = "Builder")
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExternalOrderDto {
+public class OrderDataDto {
 
-    private String pairName;
+    private String currencyPairName;
     private BigDecimal exrate;
     private BigDecimal amountBase;
-    private String operationType;
+    private BigDecimal amountConvert;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime tradeDate;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createDate;
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime acceptDate;
+    private int statusId;
+    private int operationTypeId;
 }

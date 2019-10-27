@@ -2,7 +2,7 @@ package me.exrates.externalservice.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.dto.ResolutionDto;
+import me.exrates.externalservice.model.ResolutionDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

@@ -1,9 +1,9 @@
 package me.exrates.externalservice.repositories.impl;
 
 import lombok.extern.log4j.Log4j2;
-import me.exrates.externalservice.entities.UserDto;
-import me.exrates.externalservice.entities.enums.UserRole;
-import me.exrates.externalservice.entities.enums.UserStatus;
+import me.exrates.externalservice.model.UserDto;
+import me.exrates.externalservice.model.enums.UserRole;
+import me.exrates.externalservice.model.enums.UserStatus;
 import me.exrates.externalservice.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

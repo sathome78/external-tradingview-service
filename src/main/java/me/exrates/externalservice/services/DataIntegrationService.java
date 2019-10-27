@@ -1,8 +1,7 @@
 package me.exrates.externalservice.services;
 
-import me.exrates.externalservice.api.models.CandleChartResponse;
-import me.exrates.externalservice.dto.QuotesDto;
-import me.exrates.externalservice.dto.ResolutionDto;
+import me.exrates.externalservice.model.QuotesDto;
+import me.exrates.externalservice.model.ResolutionDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,13 +10,13 @@ import java.util.concurrent.BlockingQueue;
 
 public interface DataIntegrationService {
 
-    List<QuotesDto> getQuotes(List<String> symbols);
+    List<QuotesDto> getQuotes(Map<String, String> pairs);
 
-    CandleChartResponse getHistory(String symbol, ResolutionDto resolutionDto, LocalDateTime fromDate, LocalDateTime toDate, Integer countback);
+    Map<String, Object> getHistory(String symbol, ResolutionDto resolutionDto, LocalDateTime fromDate, LocalDateTime toDate, Integer countback);
+
+    LocalDateTime getLastCandleTimeBeforeDate(String symbol, LocalDateTime date, ResolutionDto resolutionDto);
 
     String getLongPoolingResult();
 
     BlockingQueue<String> getBufferQueue();
-
-    Map<String, String> getPairs();
 }

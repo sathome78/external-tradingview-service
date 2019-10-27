@@ -1,4 +1,4 @@
-package me.exrates.externalservice.dto;
+package me.exrates.externalservice.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

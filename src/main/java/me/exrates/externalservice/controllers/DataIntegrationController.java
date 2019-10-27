@@ -1,15 +1,14 @@
 package me.exrates.externalservice.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import me.exrates.externalservice.api.models.Candle;
-import me.exrates.externalservice.api.models.CandleChartResponse;
-import me.exrates.externalservice.converters.BarDataConverter;
 import me.exrates.externalservice.converters.SymbolInfoConverter;
-import me.exrates.externalservice.dto.QuotesDto;
-import me.exrates.externalservice.dto.ResolutionDto;
-import me.exrates.externalservice.entities.enums.ResStatus;
+import me.exrates.externalservice.model.QuotesDto;
+import me.exrates.externalservice.model.ResolutionDto;
+import me.exrates.externalservice.model.enums.ResStatus;
+import me.exrates.externalservice.services.CurrencyPairService;
 import me.exrates.externalservice.services.DataIntegrationService;
 import me.exrates.externalservice.utils.TimeUtil;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -28,18 +28,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static me.exrates.externalservice.api.ExratesPublicApi.FORMATTER;
-
 @Slf4j
 @RestController
 @RequestMapping("/api")
 public class DataIntegrationController {
 
     private final DataIntegrationService integrationService;
+    private final CurrencyPairService currencyPairService;
 
     @Autowired
-    public DataIntegrationController(DataIntegrationService integrationService) {
+    public DataIntegrationController(DataIntegrationService integrationService,
+                                     CurrencyPairService currencyPairService) {
         this.integrationService = integrationService;
+        this.currencyPairService = currencyPairService;
     }
 
     @GetMapping(value = "/quotes", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -47,7 +48,14 @@ public class DataIntegrationController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            List<QuotesDto> data = integrationService.getQuotes(symbols);
+            final Map<String, String> convertedSymbols = symbols.stream()
+                    .map(symbol -> Pair.of(symbol, convert(symbol)))
+                    .filter(pair -> Objects.nonNull(pair.getValue()))
+                    .collect(Collectors.toMap(
+                            Pair::getKey,
+                            Pair::getValue));
+
+            List<QuotesDto> data = integrationService.getQuotes(convertedSymbols);
 
             response.put("s", ResStatus.OK.getStatus());
             response.put("d", data);
@@ -64,6 +72,7 @@ public class DataIntegrationController {
                                           @RequestParam Long from,
                                           @RequestParam Long to,
                                           @RequestParam(required = false) Integer countback) {
+        final String convertedSymbol = convert(symbol);
         final ResolutionDto resolutionDto = TimeUtil.getResolution(resolution);
         final LocalDateTime fromDate = TimeUtil.convert(from);
         final LocalDateTime toDate = TimeUtil.convert(to);
@@ -71,18 +80,16 @@ public class DataIntegrationController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            CandleChartResponse data = integrationService.getHistory(symbol, resolutionDto, fromDate, toDate, countback);
-
-            List<Candle> candlesList = data.getBody();
-            if (CollectionUtils.isEmpty(candlesList)) {
+            Map<String, Object> data = integrationService.getHistory(convertedSymbol, resolutionDto, fromDate, toDate, countback);
+            if (CollectionUtils.isEmpty(data)) {
                 response.put("s", ResStatus.NO_DATA.getStatus());
 
-                List<String> errors = data.getErrors();
-                if (Objects.nonNull(errors.get(0))) {
-                    response.put("nb", FORMATTER.parse(errors.get(0)));
+                LocalDateTime lastCandleTimeBeforeDate = integrationService.getLastCandleTimeBeforeDate(convertedSymbol, fromDate, resolutionDto);
+                if (Objects.nonNull(lastCandleTimeBeforeDate)) {
+                    response.put("nb", Timestamp.valueOf(lastCandleTimeBeforeDate).getTime());
                 }
             } else {
-                response.putAll(BarDataConverter.convert(candlesList));
+                response.putAll(data);
             }
         } catch (Exception ex) {
             response.put("s", ResStatus.ERROR.getStatus());
@@ -107,16 +114,12 @@ public class DataIntegrationController {
         return deferredResult;
     }
 
-    @GetMapping(value = "/symbol_info", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "c", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getSymbolInfo() {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Map<String, String> pairs = integrationService.getPairs()
-                    .entrySet().stream()
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            entry -> entry.getValue().replace("_", "/").toUpperCase()));
+            final Map<String, String> pairs = currencyPairService.getCachedActiveCurrencyPairs();
 
             response.putAll(SymbolInfoConverter.convert(pairs));
         } catch (Exception ex) {
@@ -124,5 +127,9 @@ public class DataIntegrationController {
             response.put("errmsg", ex.getMessage());
         }
         return response;
+    }
+
+    private String convert(String symbol) {
+        return currencyPairService.getCachedActiveCurrencyPairs().get(symbol);
     }
 }

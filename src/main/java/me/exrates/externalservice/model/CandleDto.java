@@ -1,11 +1,11 @@
-package me.exrates.externalservice.dto;
+package me.exrates.externalservice.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.api.models.Candle;
+import me.exrates.externalservice.api.models.CandleResponse;
 
 import java.math.BigDecimal;
 
@@ -30,14 +30,14 @@ public class CandleDto {
     @JsonProperty("f")
     private String type;
 
-    public static CandleDto of(String symbol, Candle candle) {
+    public static CandleDto of(String symbol, CandleResponse candleResponse) {
         return CandleDto.builder()
                 .symbol(symbol)
-                .close(candle.getClose())
-                .open(candle.getOpen())
-                .high(candle.getHigh())
-                .low(candle.getLow())
-                .volume(candle.getVolume())
+                .close(candleResponse.getClose())
+                .open(candleResponse.getOpen())
+                .high(candleResponse.getHigh())
+                .low(candleResponse.getLow())
+                .volume(candleResponse.getVolume())
                 .type("d")
                 .build();
     }

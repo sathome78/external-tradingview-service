@@ -1,12 +1,12 @@
-package me.exrates.externalservice.entities;
+package me.exrates.externalservice.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import me.exrates.externalservice.entities.enums.UserRole;
-import me.exrates.externalservice.entities.enums.UserStatus;
+import me.exrates.externalservice.model.enums.UserRole;
+import me.exrates.externalservice.model.enums.UserStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

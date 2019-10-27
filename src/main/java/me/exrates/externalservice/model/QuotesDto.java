@@ -1,4 +1,4 @@
-package me.exrates.externalservice.dto;
+package me.exrates.externalservice.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.exrates.externalservice.api.models.TickerResponse;
-import me.exrates.externalservice.entities.enums.ResStatus;
+import me.exrates.externalservice.model.enums.ResStatus;
 
 import java.util.Objects;
 
