@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -99,7 +100,9 @@ public class DataIntegrationController {
     }
 
     @GetMapping("/streaming")
-    public DeferredResult<String> getStreamOfPrices() {
+    public DeferredResult<String> getStreamOfPrices(HttpServletResponse response) {
+        response.addHeader("Transfer-Encoding", "chunked");
+
         DeferredResult<String> deferredResult = new DeferredResult<>();
 
         CompletableFuture.runAsync(() -> {
@@ -114,7 +117,7 @@ public class DataIntegrationController {
         return deferredResult;
     }
 
-    @GetMapping(value = "c", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/symbol_info", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getSymbolInfo() {
         Map<String, Object> response = new HashMap<>();
 
