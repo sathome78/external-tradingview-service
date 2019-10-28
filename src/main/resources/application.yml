@@ -49,7 +49,8 @@ application:
   security:
     authorization-secret: external-service-2019
   email:
-    address: oleg.kostiukevych@upholding.biz
+#    address: oleg.kostiukevych@upholding.biz
+    address: exrates.2019@gmail.com
     name: Exrates
     title-prefix:
   authorize:
@@ -66,3 +67,9 @@ api:
   chart:
     url: http://localhost:8060/data
     coinmarketcap-url: http://localhost:8060/coinmarketcap
+
+# 1. create new email for this service or use old one
+# 2. fix and add new information to email .html and .ftl
+# 3. add new database acccount with writes:
+# CURRENCY_PAIR, 2FA_GOOGLE_AUTHENTICATOR - read
+# USER - write
