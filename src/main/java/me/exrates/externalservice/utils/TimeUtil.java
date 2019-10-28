@@ -16,33 +16,34 @@ public final class TimeUtil {
         return LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
     }
 
-    public static int convertToMinutes(ResolutionDto resolutionDto) {
-        final ResolutionType resolutionType = resolutionDto.getType();
-        final int resolutionValue = resolutionDto.getValue();
+    public static int convertToMinutes(String resolution) {
+        final ResolutionDto resolutionDto = getResolution(resolution);
+        int value = resolutionDto.getValue();
+        ResolutionType type = resolutionDto.getType();
 
-        switch (resolutionType) {
+        switch (type) {
             case MINUTE: {
-                return resolutionValue;
+                return value;
             }
             case HOUR: {
-                return resolutionValue * 60;
+                return value * 60;
             }
             case DAY: {
-                return resolutionValue * 24 * 60;
+                return value * 24 * 60;
             }
             case WEEK: {
-                return resolutionValue * 7 * 24 * 60;
+                return value * 7 * 24 * 60;
             }
             case MONTH: {
-                return resolutionValue * 30 * 7 * 24 * 60;
+                return value * 30 * 7 * 24 * 60;
             }
             default: {
-                throw new UnsupportedOperationException(String.format("Resolution type - %s not supported", resolutionType));
+                throw new UnsupportedOperationException(String.format("Resolution type - %s not supported", type));
             }
         }
     }
 
-    public static ResolutionDto getResolution(String resolution) {
+    private static ResolutionDto getResolution(String resolution) {
         ResolutionType resolutionType;
         int resolutionValue;
 

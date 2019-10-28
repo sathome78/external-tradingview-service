@@ -4,8 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.api.models.CandleResponse;
 import me.exrates.externalservice.api.models.TickerResponse;
 import me.exrates.externalservice.exceptions.api.ChartApiException;
-import me.exrates.externalservice.model.ResolutionDto;
-import me.exrates.externalservice.model.enums.ResolutionType;
+import me.exrates.externalservice.utils.QueryBuilderUtil;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -21,14 +20,11 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Objects.nonNull;
 import static me.exrates.externalservice.configurations.CacheConfiguration.TICKER_DATA_CACHE;
 
 @Slf4j
@@ -56,9 +52,9 @@ public class ChartApi {
     }
 
     public TickerResponse getTickerInfo(@NotNull String symbol) {
-        final ResolutionDto resolution = new ResolutionDto(1, ResolutionType.DAY);
+        final String resolution = "D"; //1 day
 
-        final String queryParams = buildQueryParams(symbol, null, null, resolution);
+        final String queryParams = QueryBuilderUtil.build(symbol, null, null, resolution);
 
         ResponseEntity<TickerResponse[]> responseEntity;
         try {
@@ -77,9 +73,9 @@ public class ChartApi {
         return body[0];
     }
 
-    public List<CandleResponse> getCandleChartData(@NotNull String symbol, @NotNull ResolutionDto resolutionDto,
-                                                   @NotNull LocalDateTime fromDate, @NotNull LocalDateTime toDate) {
-        final String queryParams = buildQueryParams(symbol, fromDate, toDate, resolutionDto);
+    public List<CandleResponse> getCandleChartData(@NotNull String symbol, @NotNull LocalDateTime fromDate,
+                                                   @NotNull LocalDateTime toDate, @NotNull String resolution) {
+        final String queryParams = QueryBuilderUtil.build(symbol, fromDate, toDate, resolution);
 
         ResponseEntity<CandleResponse[]> responseEntity;
         try {
@@ -99,8 +95,8 @@ public class ChartApi {
     }
 
     public LocalDateTime getLastCandleTimeBeforeDate(@NotNull String symbol, @NotNull LocalDateTime toDate,
-                                                     @NotNull ResolutionDto resolutionDto) {
-        final String queryParams = buildQueryParams(symbol, null, toDate, resolutionDto);
+                                                     @NotNull String resolution) {
+        final String queryParams = QueryBuilderUtil.build(symbol, null, toDate, resolution);
 
         ResponseEntity<LocalDateTime> responseEntity;
         try {
@@ -127,24 +123,5 @@ public class ChartApi {
         httpRequestFactory.setReadTimeout(10000);
 
         return httpRequestFactory;
-    }
-
-    private String buildQueryParams(String pairName, LocalDateTime from, LocalDateTime to, ResolutionDto resolution) {
-        List<String> params = new ArrayList<>();
-
-        if (nonNull(pairName)) {
-            params.add(String.format("currencyPair=%s", pairName));
-        }
-        if (nonNull(from)) {
-            params.add(String.format("from=%s", from.format(DateTimeFormatter.ISO_DATE_TIME)));
-        }
-        if (nonNull(to)) {
-            params.add(String.format("to=%s", to.format(DateTimeFormatter.ISO_DATE_TIME)));
-        }
-        if (nonNull(resolution)) {
-            params.add(String.format("intervalValue=%s", String.valueOf(resolution.getValue())));
-            params.add(String.format("intervalType=%s", resolution.getType().name()));
-        }
-        return String.join("&", params);
     }
 }

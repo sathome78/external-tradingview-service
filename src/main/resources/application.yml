@@ -54,13 +54,7 @@ application:
     title-prefix:
   authorize:
     2fa-required: true
-  allowed-resolutions: >
-    5 MINUTE;
-    15 MINUTE;
-    30 MINUTE;
-    1 HOUR;
-    6 HOUR;
-    1 DAY;
+  allowed-resolutions: 5, 5M, 15, 15M, 30, 30M, 60, 1H, 360, 6H, 1440, 1D
 
 stream.result.size: 100
 

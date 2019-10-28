@@ -3,12 +3,10 @@ package me.exrates.externalservice.controllers;
 import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.converters.SymbolInfoConverter;
 import me.exrates.externalservice.model.QuotesDto;
-import me.exrates.externalservice.model.ResolutionDto;
 import me.exrates.externalservice.model.enums.ResStatus;
 import me.exrates.externalservice.services.CurrencyPairService;
 import me.exrates.externalservice.services.DataIntegrationService;
 import me.exrates.externalservice.utils.TimeUtil;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
@@ -27,7 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -49,14 +46,7 @@ public class DataIntegrationController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            final Map<String, String> convertedSymbols = symbols.stream()
-                    .map(symbol -> Pair.of(symbol, convert(symbol)))
-                    .filter(pair -> Objects.nonNull(pair.getValue()))
-                    .collect(Collectors.toMap(
-                            Pair::getKey,
-                            Pair::getValue));
-
-            List<QuotesDto> data = integrationService.getQuotes(convertedSymbols);
+            List<QuotesDto> data = integrationService.getQuotes(symbols);
 
             response.put("s", ResStatus.OK.getStatus());
             response.put("d", data);
@@ -69,23 +59,21 @@ public class DataIntegrationController {
 
     @GetMapping(value = "/history", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> getHistory(@RequestParam String symbol,
-                                          @RequestParam String resolution,
                                           @RequestParam Long from,
                                           @RequestParam Long to,
+                                          @RequestParam String resolution,
                                           @RequestParam(required = false) Integer countback) {
-        final String convertedSymbol = convert(symbol);
-        final ResolutionDto resolutionDto = TimeUtil.getResolution(resolution);
         final LocalDateTime fromDate = TimeUtil.convert(from);
         final LocalDateTime toDate = TimeUtil.convert(to);
 
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Map<String, Object> data = integrationService.getHistory(convertedSymbol, resolutionDto, fromDate, toDate, countback);
+            Map<String, Object> data = integrationService.getHistory(symbol, fromDate, toDate, countback, resolution);
             if (CollectionUtils.isEmpty(data)) {
                 response.put("s", ResStatus.NO_DATA.getStatus());
 
-                LocalDateTime lastCandleTimeBeforeDate = integrationService.getLastCandleTimeBeforeDate(convertedSymbol, fromDate, resolutionDto);
+                LocalDateTime lastCandleTimeBeforeDate = integrationService.getLastCandleTimeBeforeDate(symbol, fromDate, resolution);
                 if (Objects.nonNull(lastCandleTimeBeforeDate)) {
                     response.put("nb", Timestamp.valueOf(lastCandleTimeBeforeDate).getTime());
                 }
@@ -130,9 +118,5 @@ public class DataIntegrationController {
             response.put("errmsg", ex.getMessage());
         }
         return response;
-    }
-
-    private String convert(String symbol) {
-        return currencyPairService.getCachedActiveCurrencyPairs().get(symbol);
     }
 }
