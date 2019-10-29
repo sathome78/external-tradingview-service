@@ -31,7 +31,8 @@ datasource:
   password: 0oLlqyXvKkL49RdB
 
 application:
-  base-url: http://tradingview-service-prod.service:4201
+#  base-url: http://tradingview-service-prod.service:4201
+  base-url: https://tw.exrates.me
   security:
     authorization-secret: tradingview-service-prod
   email:

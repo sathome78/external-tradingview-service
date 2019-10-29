@@ -31,7 +31,8 @@ datasource:
   password: KQmK82dd
 
 application:
-  base-url: http://tradingview-service-stage.service:4203
+#  base-url: http://tradingview-service-stage.service:4203
+  base-url: https://tws.exrates.me
   security:
     authorization-secret: tradingview-service-stage
   email:
