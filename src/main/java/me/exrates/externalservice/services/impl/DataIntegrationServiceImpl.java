@@ -66,7 +66,7 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
     }
 
     @Override
-    public Map<String, Object> getHistory(String symbol, LocalDateTime fromDate, LocalDateTime toDate, Integer countback, String resolution) {
+    public Map<String, Object> getHistory(String symbol, Long from, Long to, Integer countback, String resolution) {
         final String convertedSymbol = convert(symbol);
         if (Objects.isNull(convertedSymbol)) {
             return Collections.emptyMap();
@@ -74,15 +74,15 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
         resolutionUtil.check(resolution);
 
         if (Objects.nonNull(countback)) {
-            fromDate = toDate.minusMinutes(countback * TimeUtil.convertToMinutes(resolution));
+            from = to - countback * TimeUtil.convertToSeconds(resolution);
         }
-        List<CandleResponse> data = chartApi.getCandleChartData(convertedSymbol, fromDate, toDate, resolution);
+        List<CandleResponse> data = chartApi.getCandleChartData(convertedSymbol, from, to, resolution);
 
         return BarDataConverter.convert(data);
     }
 
     @Override
-    public LocalDateTime getLastCandleTimeBeforeDate(String symbol, LocalDateTime date, String resolution) {
+    public LocalDateTime getLastCandleTimeBeforeDate(String symbol, Long date, String resolution) {
         final String convertedSymbol = convert(symbol);
         if (Objects.isNull(convertedSymbol)) {
             return null;

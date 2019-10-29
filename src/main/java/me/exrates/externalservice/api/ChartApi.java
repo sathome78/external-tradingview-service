@@ -73,9 +73,9 @@ public class ChartApi {
         return body[0];
     }
 
-    public List<CandleResponse> getCandleChartData(@NotNull String symbol, @NotNull LocalDateTime fromDate,
-                                                   @NotNull LocalDateTime toDate, @NotNull String resolution) {
-        final String queryParams = QueryBuilderUtil.build(symbol, fromDate, toDate, resolution);
+    public List<CandleResponse> getCandleChartData(@NotNull String symbol, @NotNull Long from,
+                                                   @NotNull Long to, @NotNull String resolution) {
+        final String queryParams = QueryBuilderUtil.build(symbol, from, to, resolution);
 
         ResponseEntity<CandleResponse[]> responseEntity;
         try {
@@ -94,9 +94,8 @@ public class ChartApi {
         return Arrays.asList(body);
     }
 
-    public LocalDateTime getLastCandleTimeBeforeDate(@NotNull String symbol, @NotNull LocalDateTime toDate,
-                                                     @NotNull String resolution) {
-        final String queryParams = QueryBuilderUtil.build(symbol, null, toDate, resolution);
+    public LocalDateTime getLastCandleTimeBeforeDate(@NotNull String symbol, @NotNull Long to, @NotNull String resolution) {
+        final String queryParams = QueryBuilderUtil.build(symbol, null, to, resolution);
 
         ResponseEntity<LocalDateTime> responseEntity;
         try {

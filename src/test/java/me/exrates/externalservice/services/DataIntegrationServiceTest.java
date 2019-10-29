@@ -14,6 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -170,9 +171,9 @@ public class DataIntegrationServiceTest extends AbstractTest {
                 .check(anyString());
         doReturn(Collections.singletonList(candleResponse))
                 .when(chartApi)
-                .getCandleChartData(anyString(), any(LocalDateTime.class), any(LocalDateTime.class), anyString());
+                .getCandleChartData(anyString(), any(Long.class), any(Long.class), anyString());
 
-        Map<String, Object> data = dataIntegrationService.getHistory(TEST_PAIR, NOW.minusDays(1), NOW, null, "D");
+        Map<String, Object> data = dataIntegrationService.getHistory(TEST_PAIR, NOW.minusDays(1).atZone(ZoneOffset.UTC).toEpochSecond(), NOW.atZone(ZoneOffset.UTC).toEpochSecond(), null, "D");
 
         assertNotNull(data);
         assertFalse(data.isEmpty());
@@ -183,7 +184,7 @@ public class DataIntegrationServiceTest extends AbstractTest {
 
         verify(currencyPairService, atLeastOnce()).getCachedActiveCurrencyPairs();
         verify(resolutionUtil, atLeastOnce()).check(anyString());
-        verify(chartApi, atLeastOnce()).getCandleChartData(anyString(), any(LocalDateTime.class), any(LocalDateTime.class), anyString());
+        verify(chartApi, atLeastOnce()).getCandleChartData(anyString(), any(Long.class), any(Long.class), anyString());
     }
 
     @Test
@@ -200,14 +201,14 @@ public class DataIntegrationServiceTest extends AbstractTest {
                 .when(currencyPairService)
                 .getCachedActiveCurrencyPairs();
 
-        Map<String, Object> data = dataIntegrationService.getHistory(TEST_PAIR, NOW.minusDays(1), NOW, null, "D");
+        Map<String, Object> data = dataIntegrationService.getHistory(TEST_PAIR, NOW.minusDays(1).atZone(ZoneOffset.UTC).toEpochSecond(), NOW.atZone(ZoneOffset.UTC).toEpochSecond(), null, "D");
 
         assertNotNull(data);
         assertTrue(data.isEmpty());
 
         verify(currencyPairService, atLeastOnce()).getCachedActiveCurrencyPairs();
         verify(resolutionUtil, never()).check(anyString());
-        verify(chartApi, never()).getCandleChartData(anyString(), any(LocalDateTime.class), any(LocalDateTime.class), anyString());
+        verify(chartApi, never()).getCandleChartData(anyString(), any(Long.class), any(Long.class), anyString());
     }
 
     @Test(expected = Exception.class)
@@ -219,7 +220,7 @@ public class DataIntegrationServiceTest extends AbstractTest {
                 .when(resolutionUtil)
                 .check(anyString());
 
-        dataIntegrationService.getHistory(TEST_PAIR, NOW.minusDays(1), NOW, null, "D");
+        dataIntegrationService.getHistory(TEST_PAIR, NOW.minusDays(1).atZone(ZoneOffset.UTC).toEpochSecond(), NOW.atZone(ZoneOffset.UTC).toEpochSecond(), null, "D");
     }
 
     @Test
@@ -232,9 +233,9 @@ public class DataIntegrationServiceTest extends AbstractTest {
                 .check(anyString());
         doReturn(Collections.emptyList())
                 .when(chartApi)
-                .getCandleChartData(anyString(), any(LocalDateTime.class), any(LocalDateTime.class), anyString());
+                .getCandleChartData(anyString(), any(Long.class), any(Long.class), anyString());
 
-        Map<String, Object> data = dataIntegrationService.getHistory(TEST_PAIR, NOW.minusDays(1), NOW, null, "D");
+        Map<String, Object> data = dataIntegrationService.getHistory(TEST_PAIR, NOW.minusDays(1).atZone(ZoneOffset.UTC).toEpochSecond(), NOW.atZone(ZoneOffset.UTC).toEpochSecond(), null, "D");
 
         assertNotNull(data);
         assertFalse(data.isEmpty());
@@ -245,7 +246,7 @@ public class DataIntegrationServiceTest extends AbstractTest {
 
         verify(currencyPairService, atLeastOnce()).getCachedActiveCurrencyPairs();
         verify(resolutionUtil, atLeastOnce()).check(anyString());
-        verify(chartApi, atLeastOnce()).getCandleChartData(anyString(), any(LocalDateTime.class), any(LocalDateTime.class), anyString());
+        verify(chartApi, atLeastOnce()).getCandleChartData(anyString(), any(Long.class), any(Long.class), anyString());
     }
 
     @Test
@@ -255,15 +256,15 @@ public class DataIntegrationServiceTest extends AbstractTest {
                 .getCachedActiveCurrencyPairs();
         doReturn(NOW)
                 .when(chartApi)
-                .getLastCandleTimeBeforeDate(anyString(), any(LocalDateTime.class), anyString());
+                .getLastCandleTimeBeforeDate(anyString(), any(Long.class), anyString());
 
-        LocalDateTime dateTime = dataIntegrationService.getLastCandleTimeBeforeDate(TEST_PAIR, NOW, "D");
+        LocalDateTime dateTime = dataIntegrationService.getLastCandleTimeBeforeDate(TEST_PAIR, NOW.atZone(ZoneOffset.UTC).toEpochSecond(), "D");
 
         assertNotNull(dateTime);
         assertEquals(NOW, dateTime);
 
         verify(currencyPairService, atLeastOnce()).getCachedActiveCurrencyPairs();
-        verify(chartApi, atLeastOnce()).getLastCandleTimeBeforeDate(anyString(), any(LocalDateTime.class), anyString());
+        verify(chartApi, atLeastOnce()).getLastCandleTimeBeforeDate(anyString(), any(Long.class), anyString());
     }
 
     @Test
@@ -272,12 +273,12 @@ public class DataIntegrationServiceTest extends AbstractTest {
                 .when(currencyPairService)
                 .getCachedActiveCurrencyPairs();
 
-        LocalDateTime dateTime = dataIntegrationService.getLastCandleTimeBeforeDate(TEST_PAIR, NOW, "D");
+        LocalDateTime dateTime = dataIntegrationService.getLastCandleTimeBeforeDate(TEST_PAIR, NOW.atZone(ZoneOffset.UTC).toEpochSecond(), "D");
 
         assertNull(dateTime);
 
         verify(currencyPairService, atLeastOnce()).getCachedActiveCurrencyPairs();
-        verify(chartApi, never()).getLastCandleTimeBeforeDate(anyString(), any(LocalDateTime.class), anyString());
+        verify(chartApi, never()).getLastCandleTimeBeforeDate(anyString(), any(Long.class), anyString());
     }
 
     @Test
@@ -287,14 +288,14 @@ public class DataIntegrationServiceTest extends AbstractTest {
                 .getCachedActiveCurrencyPairs();
         doReturn(null)
                 .when(chartApi)
-                .getLastCandleTimeBeforeDate(anyString(), any(LocalDateTime.class), anyString());
+                .getLastCandleTimeBeforeDate(anyString(), any(Long.class), anyString());
 
-        LocalDateTime dateTime = dataIntegrationService.getLastCandleTimeBeforeDate(TEST_PAIR, NOW, "D");
+        LocalDateTime dateTime = dataIntegrationService.getLastCandleTimeBeforeDate(TEST_PAIR, NOW.atZone(ZoneOffset.UTC).toEpochSecond(), "D");
 
         assertNull(dateTime);
 
         verify(currencyPairService, atLeastOnce()).getCachedActiveCurrencyPairs();
-        verify(chartApi, atLeastOnce()).getLastCandleTimeBeforeDate(anyString(), any(LocalDateTime.class), anyString());
+        verify(chartApi, atLeastOnce()).getLastCandleTimeBeforeDate(anyString(), any(Long.class), anyString());
     }
 
     @Test

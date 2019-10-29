@@ -3,9 +3,7 @@ package me.exrates.externalservice.controllers;
 import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.model.QuotesDto;
 import me.exrates.externalservice.model.enums.ResStatus;
-import me.exrates.externalservice.services.CurrencyPairService;
 import me.exrates.externalservice.services.DataIntegrationService;
-import me.exrates.externalservice.utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
@@ -31,13 +29,10 @@ import java.util.concurrent.TimeUnit;
 public class DataIntegrationController {
 
     private final DataIntegrationService integrationService;
-    private final CurrencyPairService currencyPairService;
 
     @Autowired
-    public DataIntegrationController(DataIntegrationService integrationService,
-                                     CurrencyPairService currencyPairService) {
+    public DataIntegrationController(DataIntegrationService integrationService) {
         this.integrationService = integrationService;
-        this.currencyPairService = currencyPairService;
     }
 
     @GetMapping(value = "/symbol_info", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,17 +72,14 @@ public class DataIntegrationController {
                                           @RequestParam Long to,
                                           @RequestParam String resolution,
                                           @RequestParam(required = false) Integer countback) {
-        final LocalDateTime fromDate = TimeUtil.convert(from);
-        final LocalDateTime toDate = TimeUtil.convert(to);
-
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Map<String, Object> data = integrationService.getHistory(symbol, fromDate, toDate, countback, resolution);
+            Map<String, Object> data = integrationService.getHistory(symbol, from, to, countback, resolution);
             if (CollectionUtils.isEmpty(data)) {
                 response.put("s", ResStatus.NO_DATA.getStatus());
 
-                LocalDateTime lastCandleTimeBeforeDate = integrationService.getLastCandleTimeBeforeDate(symbol, fromDate, resolution);
+                LocalDateTime lastCandleTimeBeforeDate = integrationService.getLastCandleTimeBeforeDate(symbol, from, resolution);
                 if (Objects.nonNull(lastCandleTimeBeforeDate)) {
                     response.put("nb", Timestamp.valueOf(lastCandleTimeBeforeDate).getTime());
                 }

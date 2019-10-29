@@ -13,9 +13,9 @@ public interface DataIntegrationService {
 
     List<QuotesDto> getQuotes(List<String> symbols);
 
-    Map<String, Object> getHistory(String symbol, LocalDateTime fromDate, LocalDateTime toDate, Integer countback, String resolution);
+    Map<String, Object> getHistory(String symbol, Long from, Long to, Integer countback, String resolution);
 
-    LocalDateTime getLastCandleTimeBeforeDate(String symbol, LocalDateTime date, String resolution);
+    LocalDateTime getLastCandleTimeBeforeDate(String symbol, Long date, String resolution);
 
     String getLongPoolingResult();
 
