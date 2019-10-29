@@ -3,8 +3,8 @@ package me.exrates.externalservice.converters;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import me.exrates.externalservice.api.models.Candle;
-import me.exrates.externalservice.entities.enums.ResStatus;
+import me.exrates.externalservice.api.models.CandleResponse;
+import me.exrates.externalservice.model.enums.ResStatus;
 
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
@@ -18,8 +18,8 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class BarDataConverter {
 
-    public static Map<String, Object> convert(List<Candle> data) {
-        data.sort(Comparator.comparing(Candle::getTime));
+    public static Map<String, Object> convert(List<CandleResponse> data) {
+        data.sort(Comparator.comparing(CandleResponse::getTime));
 
         List<Long> t = new ArrayList<>();
         List<BigDecimal> o = new ArrayList<>();
@@ -28,13 +28,13 @@ public final class BarDataConverter {
         List<BigDecimal> l = new ArrayList<>();
         List<BigDecimal> v = new ArrayList<>();
 
-        data.forEach(candle -> {
-            t.add(candle.getTime().toEpochSecond(ZoneOffset.UTC));
-            o.add(candle.getOpen());
-            h.add(candle.getHigh());
-            l.add(candle.getLow());
-            c.add(candle.getClose());
-            v.add(candle.getVolume());
+        data.forEach(candleResponse -> {
+            t.add(candleResponse.getTime().toEpochSecond(ZoneOffset.UTC));
+            o.add(candleResponse.getOpen());
+            h.add(candleResponse.getHigh());
+            l.add(candleResponse.getLow());
+            c.add(candleResponse.getClose());
+            v.add(candleResponse.getVolume());
         });
 
         Map<String, Object> response = new HashMap<>();

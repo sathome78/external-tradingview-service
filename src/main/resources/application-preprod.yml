@@ -1,0 +1,54 @@
+spring:
+  application:
+    admin:
+      enabled: true
+    name: external-service
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
+    mapper:
+      default_view_inclusion: true
+    default-property-inclusion: 'non_null'
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: exrates.2019@gmail.com
+    password: 123qwe123QWE
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  rabbitmq:
+    username: preprod
+    password: eehVBU21x
+    host: rabbitmq-preprod.service
+    port: 5672
+    trades-topic: EXTERNAL_DATA_QUEUE_PREPROD
+
+datasource:
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://birzha-aurora-preprod-cluster.cluster-cedlveyttji9.us-east-2.rds.amazonaws.com:3306/birzha?autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+  username: tradingview
+  password: RD3AiQ75NJTOAleJ
+
+application:
+  base-url: http://tradingview-service-preprod.service:4202
+  security:
+    authorization-secret: tradingview-service-preprod
+  email:
+    address: exrates.2019@gmail.com
+    name: Exrates
+    title-prefix:
+  authorize:
+    2fa-required: true
+  allowed-resolutions: 5, 5M, 15, 15M, 30, 30M, 60, 1H, 360, 6H, 1440, 1D
+
+stream.result.size: 100
+
+api:
+  chart:
+    url: http://chart-service-preprod.service:4102/data
+    coinmarketcap-url: http://chart-service-preprod.service:4102/coinmarketcap
+
+logging:
+  level:
+    me.exrates.externalservice: info

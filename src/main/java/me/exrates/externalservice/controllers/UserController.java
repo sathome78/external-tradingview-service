@@ -1,13 +1,15 @@
 package me.exrates.externalservice.controllers;
 
-import me.exrates.externalservice.dto.JwtTokenDto;
-import me.exrates.externalservice.entities.enums.ResStatus;
+import me.exrates.externalservice.model.JwtTokenDto;
+import me.exrates.externalservice.model.UserDto;
 import me.exrates.externalservice.exceptions.ServiceException;
 import me.exrates.externalservice.exceptions.ValidationException;
 import me.exrates.externalservice.exceptions.conflict.EmailExistException;
 import me.exrates.externalservice.form.AuthorizeForm;
 import me.exrates.externalservice.form.RegisterForm;
+import me.exrates.externalservice.model.enums.ResStatus;
 import me.exrates.externalservice.services.UserService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -23,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -41,8 +44,9 @@ public class UserController {
         this.required2FA = required2FA;
     }
 
+    //for test
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity register(@Validated RegisterForm form,
                                    Errors result) {
         Map<String, Object> response = new HashMap<>();
@@ -50,12 +54,29 @@ public class UserController {
             if (result.hasErrors()) {
                 throw new ValidationException(result.getAllErrors());
             }
-            userService.register(form.getLogin(), form.getPassword(), form.getPhone());
+            userService.register(form.getLogin(), form.getPassword(), form.getPhone(), form.getRole());
 
             response.put("s", ResStatus.OK.getStatus());
 
             return ResponseEntity.ok(response);
         } catch (ValidationException | EmailExistException ex) {
+            response.put("s", ResStatus.ERROR.getStatus());
+            response.put("errmsg", ex.getMessage());
+
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @PostMapping(value = "/verify/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity verifyEmail(@PathVariable("code") UUID code) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            userService.verify(code);
+
+            response.put("s", ResStatus.OK.getStatus());
+
+            return ResponseEntity.ok(response);
+        } catch (ServiceException ex) {
             response.put("s", ResStatus.ERROR.getStatus());
             response.put("errmsg", ex.getMessage());
 
@@ -71,13 +92,21 @@ public class UserController {
             if (result.hasErrors()) {
                 throw new ValidationException(result.getAllErrors());
             }
-            JwtTokenDto tokenDto;
-            if (Objects.isNull(form.getCode()) && required2FA) {
-                userService.authorize(form.getLogin());
+            UserDto user = userService.findOne(form.getLogin());
 
-                tokenDto = new JwtTokenDto(true);
+            JwtTokenDto tokenDto;
+            if (required2FA) {
+                if (StringUtils.isEmpty(form.getCode())) {
+                    userService.authorize(user);
+
+                    tokenDto = new JwtTokenDto(required2FA);
+                } else {
+                    userService.validateCode(user, form.getCode());
+
+                    tokenDto = userService.authorize(user, form.getPassword(), required2FA);
+                }
             } else {
-                tokenDto = userService.authorize(form.getLogin(), form.getPassword(), form.getCode());
+                tokenDto = userService.authorize(user, form.getPassword(), required2FA);
             }
             response.put("s", ResStatus.OK.getStatus());
             response.put("d", tokenDto);

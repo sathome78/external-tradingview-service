@@ -6,42 +6,6 @@ spring:
     admin:
       enabled: true
     name: external-service
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/external?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-    username: root
-    password: root
-    hikari:
-      connection-timeout: 10000
-      idle-timeout: 180000
-      max-lifetime: 600000
-      connection-init-sql: SELECT 1;
-      connection-test-query: SELECT 2;
-      minimum-idle: 5
-      maximum-pool-size: 200
-      validation-timeout: 5000
-  jpa:
-    hibernate:
-      ddl-auto: none
-    database: mysql
-    properties:
-      hibernate:
-        search:
-          default:
-            directory_provider: filesystem
-            indexBase: indexes/
-        jdbc:
-          batch_size: 50
-          batch_versioned_data: true
-        order_inserts: true
-        order_update: true
-        enable_lazy_load_no_trans: true
-      show_sql: true
-      format_sql: true
-    open-in-view: false
-#  redis:
-#    host: 172.10.10.236
-#    port: 6379
   jackson:
     serialization:
       write_dates_as_timestamps: false
@@ -56,39 +20,45 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
-#  rabbitmq:
-#    username: developer
-#    password: eehei4AeJein
-#    host: rabbitmq-dev.service
-#    port: 5672
-#    trades-topic: CHART_DATA_QUEUE_DEV
   rabbitmq:
     username: guest
     password: guest
     host: 127.0.0.1
     port: 5672
-    trades-topic: EXTERNAL_SERVICE_TRADES_QUEUE
-    orders-topic: EXTERNAL_SERVICE_ORDERS_QUEUE
+    trades-topic: EXTERNAL_DATA_QUEUE
+
+#datasource:
+#  driver-class-name: com.mysql.cj.jdbc.Driver
+#  url: jdbc:mysql://localhost:3306/birzha?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+#  username: root
+#  password: root
+datasource:
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://exdbdev.cedlveyttji9.us-east-2.rds.amazonaws.com:3306/dbdev2?autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+  username: exdevdb
+  password: KQmK82dd
 
 application:
+  base-url: http://localhost:8081
   security:
-    authorization-secret: external-service-2019
-  base-url: http://localhost:4200
+    authorization-secret: tradingview-service
   email:
-    address: oleg.kostiukevych@upholding.biz
+    address: exrates.2019@gmail.com
     name: Exrates
     title-prefix:
   authorize:
     2fa-required: true
-  allowed-resolutions: >
-    5 MINUTE;
-    15 MINUTE;
-    30 MINUTE;
-    1 HOUR;
-    6 HOUR;
-    1 DAY;
+  allowed-resolutions: 5, 5M, 15, 15M, 30, 30M, 60, 1H, 360, 6H, 1440, 1D
+
+stream.result.size: 100
 
 api:
-  exrates:
-#    url: http://172.31.14.167:8080/openapi/v1
-    url: http://localhost:8080/openapi/v1
+  chart:
+    url: http://localhost:8060/data
+    coinmarketcap-url: http://localhost:8060/coinmarketcap
+
+# 1. create new email for this service or use old one
+# 2. fix and add new information to email .html and .ftl
+# 3. add new database account with rights:
+# CURRENCY_PAIR, 2FA_GOOGLE_AUTHENTICATOR - read
+# USER - write

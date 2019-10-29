@@ -2,74 +2,36 @@ package me.exrates.externalservice.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import me.exrates.externalservice.dto.ResolutionDto;
-import me.exrates.externalservice.entities.enums.ResolutionType;
-import org.apache.commons.lang3.StringUtils;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import me.exrates.externalservice.model.ResolutionDto;
+import me.exrates.externalservice.model.enums.ResolutionType;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public final class TimeUtil {
 
-    public static LocalDateTime convert(long time) {
-        return LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
-    }
+    public static int convertToSeconds(String resolution) {
+        final ResolutionDto resolutionDto = ResolutionDto.getResolution(resolution);
+        int value = resolutionDto.getValue();
+        ResolutionType type = resolutionDto.getType();
 
-    public static int convertToMinutes(ResolutionDto resolutionDto) {
-        final ResolutionType resolutionType = resolutionDto.getType();
-        final int resolutionValue = resolutionDto.getValue();
-
-        switch (resolutionType) {
+        switch (type) {
             case MINUTE: {
-                return resolutionValue;
+                return value * 60;
             }
             case HOUR: {
-                return resolutionValue * 60;
+                return value * 60 * 60;
             }
             case DAY: {
-                return resolutionValue * 24 * 60;
+                return value * 24 * 60 * 60;
             }
             case WEEK: {
-                return resolutionValue * 7 * 24 * 60;
+                return value * 7 * 24 * 60 * 60;
             }
             case MONTH: {
-                return resolutionValue * 30 * 7 * 24 * 60;
+                return value * 30 * 7 * 24 * 60 * 60;
             }
             default: {
-                throw new UnsupportedOperationException(String.format("Resolution type - %s not supported", resolutionType));
+                throw new UnsupportedOperationException(String.format("Resolution type - %s not supported", type));
             }
         }
-    }
-
-    public static ResolutionDto getResolution(String resolution) {
-        ResolutionType resolutionType;
-        int resolutionValue;
-
-        if (resolution.contains("H")) {
-            resolutionType = ResolutionType.HOUR;
-            resolutionValue = getValue(resolution, "H");
-        } else if (resolution.contains("D")) {
-            resolutionType = ResolutionType.DAY;
-            resolutionValue = getValue(resolution, "D");
-        } else if (resolution.contains("W")) {
-            resolutionType = ResolutionType.WEEK;
-            resolutionValue = getValue(resolution, "W");
-        } else if (resolution.contains("M")) {
-            resolutionType = ResolutionType.MONTH;
-            resolutionValue = getValue(resolution, "M");
-        } else {
-            resolutionType = ResolutionType.MINUTE;
-            resolutionValue = Integer.valueOf(resolution);
-        }
-        return new ResolutionDto(resolutionType, resolutionValue);
-    }
-
-    private static int getValue(String resolution, String type) {
-        String strValue = resolution.replace(type, StringUtils.EMPTY);
-
-        return strValue.equals(StringUtils.EMPTY)
-                ? 1
-                : Integer.valueOf(strValue);
     }
 }

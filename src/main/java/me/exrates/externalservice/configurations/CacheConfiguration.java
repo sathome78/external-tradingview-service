@@ -13,12 +13,20 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CacheConfiguration {
 
-    public final static String CACHE_CURRENCY_PAIRS = "cache.currency-pairs";
+    public final static String CACHE_ACTIVE_CURRENCY_PAIRS = "cache.active-currency-pairs";
+    public static final String TICKER_DATA_CACHE = "cache.ticker-data";
 
-    @Bean(CACHE_CURRENCY_PAIRS)
-    public Cache cacheCurrencyPairs() {
-        return new CaffeineCache(CACHE_CURRENCY_PAIRS, Caffeine.newBuilder()
-                .expireAfterWrite(1, TimeUnit.HOURS)
+    @Bean(CACHE_ACTIVE_CURRENCY_PAIRS)
+    public Cache cacheActiveCurrencyPairs() {
+        return new CaffeineCache(CACHE_ACTIVE_CURRENCY_PAIRS, Caffeine.newBuilder()
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .build());
+    }
+
+    @Bean(TICKER_DATA_CACHE)
+    public Cache cacheTickerData() {
+        return new CaffeineCache(TICKER_DATA_CACHE, Caffeine.newBuilder()
+                .expireAfterWrite(5, TimeUnit.MINUTES)
                 .build());
     }
 }

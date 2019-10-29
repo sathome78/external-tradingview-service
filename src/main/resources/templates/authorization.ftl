@@ -4,7 +4,7 @@
       style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400;">
 &#13;
 <head>&#13;
-    <meta name="viewport" content="width=device-width"/>&#13;
+    <meta authority="viewport" content="width=device-width"/>&#13;
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>&#13;
     &#13;
 </head>&#13;
@@ -36,6 +36,14 @@
                                     &#13;
                                     <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400; vertical-align: top; text-align: center; padding: 0 0 20px;"
                                         align="center" valign="top">&#13;
+                                        <h2 style="font-family: 'Montserrat', sans-serif; font-size: 18px !important; line-height: 1.3; box-sizing: border-box; font-weight: 600 !important; color: #000; margin: 10px 0 5px;">
+                                            Dear user!</h2>&#13;
+                                    </td>&#13;
+                                </tr>&#13;
+                                <tr style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400;">
+                                    &#13;
+                                    <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400; vertical-align: top; text-align: center; padding: 0 0 20px;"
+                                        align="center" valign="top">&#13;
                                         <h3 style="font-family: 'Montserrat', sans-serif; font-size: 16px !important; line-height: 1.3; box-sizing: border-box; font-weight: 600 !important; color: #000; margin: 10px 0 5px;">
                                             &#13;
                                             Two factor authorization code: ${code}&#13;
@@ -59,9 +67,7 @@
                                 align="center" valign="top">&#13;
                                 Тел.: +0 123 456 7890 <br
                                         style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400;"/>&#13;
-                                Email: exrates.2019@gmail.com <br
-                                        style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400;"/>&#13;
-                                Telegram: &#13;
+                                Email: exrates.2019@gmail.com &#13;
                             </td>&#13;
                         </tr>&#13;
                         <tr style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400;">

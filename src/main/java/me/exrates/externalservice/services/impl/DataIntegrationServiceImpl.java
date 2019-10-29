@@ -1,18 +1,23 @@
 package me.exrates.externalservice.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import me.exrates.externalservice.api.ExratesPublicApi;
-import me.exrates.externalservice.api.models.CandleChartResponse;
-import me.exrates.externalservice.dto.QuotesDto;
-import me.exrates.externalservice.dto.ResolutionDto;
+import me.exrates.externalservice.api.ChartApi;
+import me.exrates.externalservice.api.models.CandleResponse;
+import me.exrates.externalservice.converters.BarDataConverter;
+import me.exrates.externalservice.converters.SymbolInfoConverter;
+import me.exrates.externalservice.model.QuotesDto;
+import me.exrates.externalservice.services.CurrencyPairService;
 import me.exrates.externalservice.services.DataIntegrationService;
 import me.exrates.externalservice.utils.ResolutionUtil;
 import me.exrates.externalservice.utils.TimeUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,42 +31,76 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
 
     private final BlockingQueue<String> bufferQueue = new LinkedBlockingDeque<>();
 
-    private final ExratesPublicApi publicApi;
+    private final int resultSize;
+
+    private final CurrencyPairService currencyPairService;
+    private final ChartApi chartApi;
     private final ResolutionUtil resolutionUtil;
 
     @Autowired
-    public DataIntegrationServiceImpl(ExratesPublicApi publicApi,
+    public DataIntegrationServiceImpl(@Value("${stream.result.size:100}") int resultSize,
+                                      CurrencyPairService currencyPairService,
+                                      ChartApi chartApi,
                                       ResolutionUtil resolutionUtil) {
-        this.publicApi = publicApi;
+        this.resultSize = resultSize;
+        this.currencyPairService = currencyPairService;
+        this.chartApi = chartApi;
         this.resolutionUtil = resolutionUtil;
+    }
+
+    @Override
+    public Map<String, Object> getSymbolInfo() {
+        Map<String, String> data = currencyPairService.getCachedActiveCurrencyPairs();
+
+        return SymbolInfoConverter.convert(data);
     }
 
     @Override
     public List<QuotesDto> getQuotes(List<String> symbols) {
         return symbols.stream()
-                .map(symbol -> QuotesDto.of(symbol, publicApi.getTickerInfo(symbol)))
+                .map(symbol -> Pair.of(symbol, convert(symbol)))
+                .filter(pair -> Objects.nonNull(pair.getValue()))
+                .map(pair -> QuotesDto.of(pair.getKey(), chartApi.getCachedTickerInfo(pair.getValue())))
                 .filter(quotesDto -> Objects.nonNull(quotesDto.getPrice()))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public CandleChartResponse getHistory(String symbol, ResolutionDto resolutionDto, LocalDateTime fromDate, LocalDateTime toDate, Integer countback) {
-        resolutionUtil.check(resolutionDto);
+    public Map<String, Object> getHistory(String symbol, Long from, Long to, Integer countback, String resolution) {
+        final String convertedSymbol = convert(symbol);
+        if (Objects.isNull(convertedSymbol)) {
+            return Collections.emptyMap();
+        }
+        resolutionUtil.check(resolution);
 
         if (Objects.nonNull(countback)) {
-            fromDate = toDate.minusMinutes(countback * TimeUtil.convertToMinutes(resolutionDto));
+            from = to - countback * TimeUtil.convertToSeconds(resolution);
         }
-        return publicApi.getCandleChartData(symbol, resolutionDto, fromDate, toDate);
+        List<CandleResponse> data = chartApi.getCandleChartData(convertedSymbol, from, to, resolution);
+
+        return BarDataConverter.convert(data);
+    }
+
+    @Override
+    public LocalDateTime getLastCandleTimeBeforeDate(String symbol, Long date, String resolution) {
+        final String convertedSymbol = convert(symbol);
+        if (Objects.isNull(convertedSymbol)) {
+            return null;
+        }
+        return chartApi.getLastCandleTimeBeforeDate(convertedSymbol, date, resolution);
     }
 
     @Override
     public String getLongPoolingResult() {
         StringBuilder result = new StringBuilder(StringUtils.EMPTY);
 
-        while (!bufferQueue.isEmpty()) {
+        int size = 0;
+        while (!bufferQueue.isEmpty() && size <= resultSize) {
             try {
                 result.append(bufferQueue.take());
                 result.append("\n");
+
+                size++;
             } catch (InterruptedException ex) {
                 log.error("Interrupted exception occurred");
             }
@@ -74,8 +113,7 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
         return bufferQueue;
     }
 
-    @Override
-    public Map<String, String> getPairs() {
-        return publicApi.getCurrencyPairsCached();
+    private String convert(String symbol) {
+        return currencyPairService.getCachedActiveCurrencyPairs().get(symbol);
     }
 }

@@ -1,5 +1,6 @@
 package me.exrates.externalservice.web.security;
 
+import me.exrates.externalservice.exceptions.VerificationException;
 import me.exrates.externalservice.exceptions.notfound.UserNotFoundException;
 import me.exrates.externalservice.properties.SecurityProperty;
 import me.exrates.externalservice.services.UserService;
@@ -19,7 +20,7 @@ public class UserJwtAuthenticationProcessFilter extends AbstractJwtAuthenticatio
     UserDetails getById(String principalId) throws UserDetailsNotFoundException {
         try {
             return userService.findOne(principalId);
-        } catch (UserNotFoundException ex) {
+        } catch (UserNotFoundException | VerificationException ex) {
             throw new UserDetailsNotFoundException(ex.getMessage(), ex);
         }
     }
