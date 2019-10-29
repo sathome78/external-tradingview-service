@@ -56,9 +56,9 @@
                                         <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: normal; margin: 10px 5px;">
                                             To activate your account, follow the link</p>&#13;
                                         <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: normal; margin: 10px 5px;">
-                                            <a href="${baseUrl}/api/verify/${code}"
+                                            <a href="${baseUrl}/api/register/verify/${code}"
                                                style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 16px; box-sizing: border-box; font-weight: 400; color: #4ac8ed; text-decoration: underline;">
-                                            ${baseUrl}/api/verify/${code}</a></p>&#13;
+                                            ${baseUrl}/api/register/verify/${code}</a></p>&#13;
                                     </td>&#13;
                                 </tr>&#13;
                             </table>&#13;

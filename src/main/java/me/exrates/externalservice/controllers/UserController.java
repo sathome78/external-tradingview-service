@@ -67,7 +67,7 @@ public class UserController {
         }
     }
 
-    @PostMapping(value = "/verify/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/register/verify/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity verifyEmail(@PathVariable("code") UUID code) {
         Map<String, Object> response = new HashMap<>();
         try {
