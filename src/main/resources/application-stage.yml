@@ -1,6 +1,3 @@
-server:
-  port: 8081
-
 spring:
   application:
     admin:
@@ -21,17 +18,12 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
   rabbitmq:
-    username: guest
-    password: guest
-    host: 127.0.0.1
+    username: developer
+    password: eehei4AeJein
+    host: rabbitmq-dev.service
     port: 5672
-    trades-topic: EXTERNAL_DATA_QUEUE
+    trades-topic: EXTERNAL_DATA_QUEUE_STAGE
 
-#datasource:
-#  driver-class-name: com.mysql.cj.jdbc.Driver
-#  url: jdbc:mysql://localhost:3306/birzha?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-#  username: root
-#  password: root
 datasource:
   driver-class-name: com.mysql.cj.jdbc.Driver
   url: jdbc:mysql://exdbdev.cedlveyttji9.us-east-2.rds.amazonaws.com:3306/dbdev2?autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
@@ -39,9 +31,9 @@ datasource:
   password: KQmK82dd
 
 application:
-  base-url: http://localhost:8081
+  base-url: http://tradingview-service-stage.service:4103
   security:
-    authorization-secret: tradingview-service
+    authorization-secret: tradingview-service-stage
   email:
     address: exrates.2019@gmail.com
     name: Exrates
@@ -54,11 +46,9 @@ stream.result.size: 100
 
 api:
   chart:
-    url: http://localhost:8060/data
-    coinmarketcap-url: http://localhost:8060/coinmarketcap
+    url: http://chart-service-stage.service:4103/data
+    coinmarketcap-url: http://chart-service-stage.service:4103/coinmarketcap
 
-# 1. create new email for this service or use old one
-# 2. fix and add new information to email .html and .ftl
-# 3. add new database account with rights:
-# CURRENCY_PAIR, 2FA_GOOGLE_AUTHENTICATOR - read
-# USER - write
+logging:
+  level:
+    me.exrates.externalservice: debug

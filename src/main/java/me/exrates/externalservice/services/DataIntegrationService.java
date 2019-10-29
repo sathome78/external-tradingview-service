@@ -1,6 +1,5 @@
 package me.exrates.externalservice.services;
 
-import me.exrates.externalservice.api.models.CandleResponse;
 import me.exrates.externalservice.model.QuotesDto;
 
 import java.time.LocalDateTime;
@@ -9,6 +8,8 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 public interface DataIntegrationService {
+
+    Map<String, Object> getSymbolInfo();
 
     List<QuotesDto> getQuotes(List<String> symbols);
 

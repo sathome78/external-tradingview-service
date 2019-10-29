@@ -1,7 +1,6 @@
 package me.exrates.externalservice.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import me.exrates.externalservice.converters.SymbolInfoConverter;
 import me.exrates.externalservice.model.QuotesDto;
 import me.exrates.externalservice.model.enums.ResStatus;
 import me.exrates.externalservice.services.CurrencyPairService;
@@ -39,6 +38,21 @@ public class DataIntegrationController {
                                      CurrencyPairService currencyPairService) {
         this.integrationService = integrationService;
         this.currencyPairService = currencyPairService;
+    }
+
+    @GetMapping(value = "/symbol_info", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> getSymbolInfo() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Map<String, Object> data = integrationService.getSymbolInfo();
+
+            response.putAll(data);
+        } catch (Exception ex) {
+            response.put("s", ResStatus.ERROR.getStatus());
+            response.put("errmsg", ex.getMessage());
+        }
+        return response;
     }
 
     @GetMapping(value = "/quotes", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -103,20 +117,5 @@ public class DataIntegrationController {
             }
         });
         return deferredResult;
-    }
-
-    @GetMapping(value = "/symbol_info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> getSymbolInfo() {
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            final Map<String, String> pairs = currencyPairService.getCachedActiveCurrencyPairs();
-
-            response.putAll(SymbolInfoConverter.convert(pairs));
-        } catch (Exception ex) {
-            response.put("s", ResStatus.ERROR.getStatus());
-            response.put("errmsg", ex.getMessage());
-        }
-        return response;
     }
 }

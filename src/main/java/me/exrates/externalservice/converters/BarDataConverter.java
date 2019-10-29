@@ -5,12 +5,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import me.exrates.externalservice.api.models.CandleResponse;
 import me.exrates.externalservice.model.enums.ResStatus;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +19,6 @@ import java.util.Map;
 public final class BarDataConverter {
 
     public static Map<String, Object> convert(List<CandleResponse> data) {
-        if (CollectionUtils.isEmpty(data)) {
-            return Collections.emptyMap();
-        }
         data.sort(Comparator.comparing(CandleResponse::getTime));
 
         List<Long> t = new ArrayList<>();

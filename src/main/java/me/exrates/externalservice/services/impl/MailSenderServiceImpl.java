@@ -81,7 +81,7 @@ public class MailSenderServiceImpl implements MailSenderService {
             );
             return content.toString();
         } catch (Exception ex) {
-            log.warn("Exception occurred while processing fmTemplate: ", ex);
+            log.warn("Exception occurred while processing fmTemplate", ex);
             return null;
         }
     }

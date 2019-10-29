@@ -21,7 +21,7 @@ public final class SymbolInfoConverter {
     private static final String[] FIAT_LIST = new String[]{"USD", "EUR", "CNY", "IDR", "NGN", "TRY", "UAH", "VND", "AED", "RUB"};
     private static final String[] RESOLUTIONS = new String[]{"5", "15", "30", "60", "360", "D"};
 
-    public static Map<String, Object> convert(Map<String, String> pairs) {
+    public static Map<String, Object> convert(Map<String, String> data) {
         List<String> symbol = new ArrayList<>();
         List<String> description = new ArrayList<>();
         List<String> currency = new ArrayList<>();
@@ -38,7 +38,7 @@ public final class SymbolInfoConverter {
         List<Boolean> hasDaily = new ArrayList<>();
         List<Boolean> barFillgaps = new ArrayList<>();
 
-        pairs.forEach((key, value) -> {
+        data.forEach((key, value) -> {
             symbol.add(key);
             description.add(value);
             currency.add(value.split(DELIMITER)[1]);

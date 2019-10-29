@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.exrates.externalservice.api.ChartApi;
 import me.exrates.externalservice.api.models.CandleResponse;
 import me.exrates.externalservice.converters.BarDataConverter;
+import me.exrates.externalservice.converters.SymbolInfoConverter;
 import me.exrates.externalservice.model.QuotesDto;
 import me.exrates.externalservice.services.CurrencyPairService;
 import me.exrates.externalservice.services.DataIntegrationService;
@@ -45,6 +46,13 @@ public class DataIntegrationServiceImpl implements DataIntegrationService {
         this.currencyPairService = currencyPairService;
         this.chartApi = chartApi;
         this.resolutionUtil = resolutionUtil;
+    }
+
+    @Override
+    public Map<String, Object> getSymbolInfo() {
+        Map<String, String> data = currencyPairService.getCachedActiveCurrencyPairs();
+
+        return SymbolInfoConverter.convert(data);
     }
 
     @Override
