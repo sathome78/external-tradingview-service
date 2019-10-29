@@ -28,10 +28,10 @@ datasource:
   driver-class-name: com.mysql.cj.jdbc.Driver
   url: jdbc:mysql://exprod-3-cluster.cluster-ro-cedlveyttji9.us-east-2.rds.amazonaws.com:3306/birzha?autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
   username: tradingview
-  password:
+  password: 0oLlqyXvKkL49RdB
 
 application:
-  base-url: http://tradingview-service-prod.service:4101
+  base-url: http://tradingview-service-prod.service:4201
   security:
     authorization-secret: tradingview-service-prod
   email:

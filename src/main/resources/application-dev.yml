@@ -31,7 +31,7 @@ datasource:
   password: KQmK82dd
 
 application:
-  base-url: http://tradingview-service-dev.service:4104
+  base-url: http://tradingview-service-dev.service:4204
   security:
     authorization-secret: tradingview-service-dev
   email:

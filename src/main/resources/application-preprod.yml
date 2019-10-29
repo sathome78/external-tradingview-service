@@ -27,11 +27,11 @@ spring:
 datasource:
   driver-class-name: com.mysql.cj.jdbc.Driver
   url: jdbc:mysql://birzha-aurora-preprod-cluster.cluster-cedlveyttji9.us-east-2.rds.amazonaws.com:3306/birzha?autoReconnect=true&useSSL=false&rewriteBatchedStatements=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-  username: devprod
-  password: Fh24soaf8sy3
+  username: tradingview
+  password: RD3AiQ75NJTOAleJ
 
 application:
-  base-url: http://tradingview-service-preprod.service:4102
+  base-url: http://tradingview-service-preprod.service:4202
   security:
     authorization-secret: tradingview-service-preprod
   email:
