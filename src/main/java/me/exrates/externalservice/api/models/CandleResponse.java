@@ -3,18 +3,13 @@ package me.exrates.externalservice.api.models;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import me.exrates.externalservice.serializers.LocalDateTimeDeserializer;
-import me.exrates.externalservice.serializers.LocalDateTimeSerializer;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,9 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CandleResponse {
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime time;
+    private Long time;
     private BigDecimal close;
     private BigDecimal open;
     private BigDecimal high;

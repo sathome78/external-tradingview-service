@@ -156,7 +156,7 @@ public class DataIntegrationServiceTest extends AbstractTest {
     @Test
     public void getHistory_ok() {
         CandleResponse candleResponse = new CandleResponse();
-        candleResponse.setTime(NOW);
+        candleResponse.setTime(NOW.toEpochSecond(ZoneOffset.UTC));
         candleResponse.setOpen(BigDecimal.ONE);
         candleResponse.setClose(BigDecimal.ONE);
         candleResponse.setHigh(BigDecimal.ONE);
@@ -190,7 +190,7 @@ public class DataIntegrationServiceTest extends AbstractTest {
     @Test
     public void getHistory_symbol_not_found() {
         CandleResponse candleResponse = new CandleResponse();
-        candleResponse.setTime(NOW);
+        candleResponse.setTime(NOW.toEpochSecond(ZoneOffset.UTC));
         candleResponse.setOpen(BigDecimal.ONE);
         candleResponse.setClose(BigDecimal.ONE);
         candleResponse.setHigh(BigDecimal.ONE);
