@@ -1,7 +1,6 @@
 package me.exrates.externalservice.services;
 
 import me.exrates.externalservice.exceptions.AuthorizationException;
-import me.exrates.externalservice.exceptions.InvalidCodeException;
 import me.exrates.externalservice.exceptions.VerificationException;
 import me.exrates.externalservice.exceptions.conflict.EmailExistException;
 import me.exrates.externalservice.exceptions.notfound.UserNotFoundException;
@@ -25,12 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -45,8 +42,6 @@ public class UserServiceTest extends AbstractTest {
     @Mock
     private MailSenderService mailSenderService;
     @Mock
-    private Google2FAService google2FAService;
-    @Mock
     private SecurityProperty securityProperty;
 
     private UserService userService;
@@ -58,7 +53,6 @@ public class UserServiceTest extends AbstractTest {
                 passwordEncoder,
                 afterCommitExecutor,
                 mailSenderService,
-                google2FAService,
                 securityProperty));
     }
 
@@ -165,47 +159,7 @@ public class UserServiceTest extends AbstractTest {
     }
 
     @Test
-    public void authorize1_ok() {
-        UserDto user = UserDto.builder()
-                .id(1)
-                .login("login")
-                .build();
-
-        doReturn(false)
-                .when(google2FAService)
-                .isGoogleAuthenticatorEnable(anyInt());
-        doNothing()
-                .when(userRepository)
-                .updateCode(anyInt(), anyString());
-        doReturn("password_encoded")
-                .when(passwordEncoder)
-                .encode(anyString());
-
-        userService.authorize(user);
-
-        verify(google2FAService, atLeastOnce()).isGoogleAuthenticatorEnable(anyInt());
-        verify(userRepository, atLeastOnce()).updateCode(anyInt(), anyString());
-    }
-
-    @Test
-    public void authorize1_google() {
-        UserDto user = UserDto.builder()
-                .id(1)
-                .login("login")
-                .build();
-
-        doReturn(true)
-                .when(google2FAService)
-                .isGoogleAuthenticatorEnable(anyInt());
-
-        userService.authorize(user);
-
-        verify(google2FAService, atLeastOnce()).isGoogleAuthenticatorEnable(anyInt());
-        verify(userRepository, never()).updateCode(anyInt(), anyString());
-    }
-
-    @Test
-    public void authorize2_ok() throws Exception {
+    public void authorize_ok() throws Exception {
         UserDto user = UserDto.builder()
                 .id(1)
                 .login("login")
@@ -218,11 +172,8 @@ public class UserServiceTest extends AbstractTest {
         doReturn("secret")
                 .when(securityProperty)
                 .getAuthorizationSecret();
-        doNothing()
-                .when(userRepository)
-                .updateCode(anyInt(), anyString());
 
-        JwtTokenDto token = userService.authorize(user, "password", true);
+        JwtTokenDto token = userService.authorize(user, "password");
 
         assertNotNull(token);
 
@@ -242,91 +193,6 @@ public class UserServiceTest extends AbstractTest {
                 .when(passwordEncoder)
                 .matches(anyString(), anyString());
 
-        userService.authorize(user, "password", true);
-    }
-
-    @Test
-    public void validateCode_google_true_ok() throws Exception {
-        UserDto user = UserDto.builder()
-                .id(1)
-                .login("login")
-                .password("password")
-                .code("code")
-                .build();
-
-        doReturn(true)
-                .when(google2FAService)
-                .isGoogleAuthenticatorEnable(anyInt());
-        doReturn(true)
-                .when(google2FAService)
-                .checkGoogle2faVerifyCode(anyString(), anyInt());
-
-        userService.validateCode(user, "code");
-
-        verify(google2FAService, atLeastOnce()).isGoogleAuthenticatorEnable(anyInt());
-        verify(google2FAService, atLeastOnce()).checkGoogle2faVerifyCode(anyString(), anyInt());
-    }
-
-    @Test(expected = InvalidCodeException.class)
-    public void validateCode_google_true_verified_false() throws Exception {
-        UserDto user = UserDto.builder()
-                .id(1)
-                .login("login")
-                .password("password")
-                .code("code")
-                .build();
-
-        doReturn(true)
-                .when(google2FAService)
-                .isGoogleAuthenticatorEnable(anyInt());
-        doReturn(false)
-                .when(google2FAService)
-                .checkGoogle2faVerifyCode(anyString(), anyInt());
-
-        userService.validateCode(user, "code");
-    }
-
-    @Test
-    public void validateCode_google_false_ok() throws Exception {
-        UserDto user = UserDto.builder()
-                .id(1)
-                .login("login")
-                .password("password")
-                .code("code")
-                .build();
-
-        doReturn(false)
-                .when(google2FAService)
-                .isGoogleAuthenticatorEnable(anyInt());
-        doReturn(true)
-                .when(passwordEncoder)
-                .matches(anyString(), anyString());
-        doNothing()
-                .when(userRepository)
-                .updateCode(anyInt(), anyString());
-
-        userService.validateCode(user, "code");
-
-        verify(google2FAService, atLeastOnce()).isGoogleAuthenticatorEnable(anyInt());
-        verify(passwordEncoder, atLeastOnce()).matches(anyString(), anyString());
-    }
-
-    @Test(expected = InvalidCodeException.class)
-    public void validateCode_google_password_not_matches() throws Exception {
-        UserDto user = UserDto.builder()
-                .id(1)
-                .login("login")
-                .password("password")
-                .code("code")
-                .build();
-
-        doReturn(false)
-                .when(google2FAService)
-                .isGoogleAuthenticatorEnable(anyInt());
-        doReturn(false)
-                .when(passwordEncoder)
-                .matches(anyString(), anyString());
-
-        userService.validateCode(user, "code");
+        userService.authorize(user, "password");
     }
 }

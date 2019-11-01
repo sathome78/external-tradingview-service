@@ -1,17 +1,15 @@
 package me.exrates.externalservice.controllers;
 
-import me.exrates.externalservice.model.JwtTokenDto;
-import me.exrates.externalservice.model.UserDto;
 import me.exrates.externalservice.exceptions.ServiceException;
 import me.exrates.externalservice.exceptions.ValidationException;
 import me.exrates.externalservice.exceptions.conflict.EmailExistException;
 import me.exrates.externalservice.form.AuthorizeForm;
 import me.exrates.externalservice.form.RegisterForm;
+import me.exrates.externalservice.model.JwtTokenDto;
+import me.exrates.externalservice.model.UserDto;
 import me.exrates.externalservice.model.enums.ResStatus;
 import me.exrates.externalservice.services.UserService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,13 +33,9 @@ public class UserController {
 
     private final UserService userService;
 
-    private final boolean required2FA;
-
     @Autowired
-    public UserController(UserService userService,
-                          @Value("${application.authorize.2fa-required}") boolean required2FA) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.required2FA = required2FA;
     }
 
     //for test
@@ -94,20 +88,8 @@ public class UserController {
             }
             UserDto user = userService.findOne(form.getLogin());
 
-            JwtTokenDto tokenDto;
-            if (required2FA) {
-                if (StringUtils.isEmpty(form.getCode())) {
-                    userService.authorize(user);
+            JwtTokenDto tokenDto = userService.authorize(user, form.getPassword());
 
-                    tokenDto = new JwtTokenDto(required2FA);
-                } else {
-                    userService.validateCode(user, form.getCode());
-
-                    tokenDto = userService.authorize(user, form.getPassword(), required2FA);
-                }
-            } else {
-                tokenDto = userService.authorize(user, form.getPassword(), required2FA);
-            }
             response.put("s", ResStatus.OK.getStatus());
             response.put("d", tokenDto);
         } catch (ValidationException | ServiceException ex) {

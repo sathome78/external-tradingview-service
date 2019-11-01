@@ -77,19 +77,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void updateCode(int userId, String code) {
-        final String sql = "UPDATE USER u " +
-                "SET u.login_pin = :login_pin " +
-                "WHERE u.id = :user_id";
-
-        final Map<String, Object> params = new HashMap<>();
-        params.put("user_id", userId);
-        params.put("login_pin", code);
-
-        masterJdbcTemplate.update(sql, params);
-    }
-
-    @Override
     public void updateStatus(String login, UserStatus status) {
         final String sql = "UPDATE USER u " +
                 "SET u.status = :status " +

@@ -39,8 +39,6 @@ application:
     address: exrates.2019@gmail.com
     name: Exrates
     title-prefix:
-  authorize:
-    2fa-required: true
   allowed-resolutions: 5, 5M, 15, 15M, 30, 30M, 60, 1H, 360, 6H, 1440, 1D
 
 stream.result.size: 100

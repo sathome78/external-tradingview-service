@@ -9,7 +9,5 @@ public interface UserRepository {
 
     void save(UserDto user);
 
-    void updateCode(int userId, String code);
-
     void updateStatus(String login, UserStatus status);
 }

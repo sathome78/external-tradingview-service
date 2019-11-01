@@ -65,7 +65,7 @@ public class MailSenderServiceTest extends AbstractTest {
                 .when(mailSender)
                 .send(any(MimeMessage.class));
 
-        mailSenderService.send(EmailType.AUTHORIZATION, "Exrates", "to@test.ru", null);
+        mailSenderService.send(EmailType.VERIFICATION, "Exrates", "to@test.ru", null);
 
         verify(applicationProperty, atLeastOnce()).getBaseUrl();
         verify(emailProperty, atLeastOnce()).getAddress();
@@ -100,7 +100,7 @@ public class MailSenderServiceTest extends AbstractTest {
                 .when(mailSender)
                 .send(any(MimeMessage.class));
 
-        mailSenderService.send(EmailType.AUTHORIZATION, "to@test.ru", null);
+        mailSenderService.send(EmailType.VERIFICATION, "to@test.ru", null);
 
         verify(applicationProperty, atLeastOnce()).getBaseUrl();
         verify(emailProperty, atLeastOnce()).getAddress();
