@@ -31,7 +31,8 @@ datasource:
   password: RD3AiQ75NJTOAleJ
 
 application:
-  base-url: http://tradingview-service-preprod.service:4202
+#  base-url: http://tradingview-service-preprod.service:4202
+  base-url: https://twpp.exrates.me
   security:
     authorization-secret: tradingview-service-preprod
   email:

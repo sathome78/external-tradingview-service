@@ -1,12 +1,12 @@
 package me.exrates.externalservice.controllers;
 
-import me.exrates.externalservice.model.JwtTokenDto;
-import me.exrates.externalservice.model.UserDto;
 import me.exrates.externalservice.exceptions.ServiceException;
 import me.exrates.externalservice.exceptions.ValidationException;
 import me.exrates.externalservice.exceptions.conflict.EmailExistException;
 import me.exrates.externalservice.form.AuthorizeForm;
 import me.exrates.externalservice.form.RegisterForm;
+import me.exrates.externalservice.model.JwtTokenDto;
+import me.exrates.externalservice.model.UserDto;
 import me.exrates.externalservice.model.enums.ResStatus;
 import me.exrates.externalservice.services.UserService;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +67,7 @@ public class UserController {
         }
     }
 
-    @PostMapping(value = "/verify/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/register/verify/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity verifyEmail(@PathVariable("code") UUID code) {
         Map<String, Object> response = new HashMap<>();
         try {
